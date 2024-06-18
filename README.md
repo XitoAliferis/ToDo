@@ -4,4 +4,4 @@ This is a personal project that I felt was something I could create fully tailor
 
 ## Web App
 
-The web app of this project was created using React and Tailwind 
+The web app of this project was created using React and Tailwind for the front-end, Node.Js for the backend and Vercel's Postgres SQL Database. 
