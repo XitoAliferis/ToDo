@@ -31,6 +31,7 @@ async function createTable() {
         done BOOLEAN,
         date TIMESTAMP,
         "group" VARCHAR(255),
+        allDay BOOLEAN,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -46,19 +47,20 @@ async function createTable() {
 
 async function preloadData() {
     const reminderItemData = [
-        { id: uuidv4(), name: "June 18", done: true, date: "2024-06-18T15:16:00.000Z", group: "" },
-        { id: uuidv4(), name: "June 17th reminders", done: false, date: "2024-06-17T14:58:00Z", group: "" }
+        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allDay: false },
+        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allDay: false  }
     ];
 
     const reminderData = [
-        { id: uuidv4(), name: "Sarah", color: "#febed4" },
+        { id: uuidv4(), name: "Sarah's Reminders", color: "#febed4" },
+        { id: uuidv4(), name: "Xito's Reminders", color: "#acbda1" },
     ];
 
     for (const x of reminderItemData) {
         const estDate = convertToLocal(x.date).toISOString();
         await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group")
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group})
+        INSERT INTO ReminderItem (id, name, done, date, "group", allDay)
+        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allDay})
         ON CONFLICT (id) DO NOTHING;
         `;
     }
@@ -74,22 +76,19 @@ async function preloadData() {
 
 async function setReminderItemData(x) {
     let dateString = x.date;
-
-    // If the date string doesn't end with 'Z', add ':00Z'
-    if (!dateString.endsWith('Z')) {
-        dateString += ":00Z";
-    }
-
-    const estDate = new convertToLocal(dateString).toISOString();
+  
+    // If allDay is true, use the date as it is without converting to local
+    const estDate = x.allDay ? new Date(dateString).toISOString().slice(0, 10) : convertToLocal(new Date(dateString)).toISOString();
     console.log(estDate);
-
+  
     const createdAt = new Date().toISOString(); // Get the current timestamp
-
+  
     await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", created_at)
-        VALUES (${uuidv4()}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${createdAt});
+        INSERT INTO ReminderItem (id, name, done, date, "group", allDay, created_at)
+        VALUES (${uuidv4()}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allDay}, ${createdAt});
     `;
-}
+  }
+  
 
 async function setReminderData(x) {
     await sql`
@@ -99,7 +98,7 @@ async function setReminderData(x) {
 }
 
 async function getReminderItemData() {
-    return await sql`SELECT * FROM ReminderItem ORDER BY created_at;`;
+    return await sql`SELECT * FROM ReminderItem ORDER BY date;`;
 }
 
 async function getReminderData() {

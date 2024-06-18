@@ -56,8 +56,8 @@ function App() {
     }
   };
 
-  const handleAddReminder = async (name, date, group) => {
-    const reminderObject = { name: name, done: false, date: date, group: group };
+  const handleAddReminder = async (name, date, group, allDay) => {
+    const reminderObject = { name: name, done: false, date: date, group: group, allDay: allDay };
 
     try {
       const response = await axios.post('/reminderItemData', reminderObject);
@@ -69,7 +69,7 @@ function App() {
 
   const navItems = [
     { href: "/", label: "Today", bgColor: "#EE6B6E" },
-    { href: "/Upcoming", label: "Upcoming", bgColor: "#FFFDD0" },
+    { href: "/Upcoming", label: "Upcoming", bgColor: "#FFFFFF" },
     ...reminders.map(cls => ({
       href: `/${cls.name.replace(/\s+/g, '')}`,
       label: `${cls.name}`,
