@@ -4,9 +4,9 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import moment from 'moment-timezone';
 const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleCheckItem, handleAddReminder }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const [newReminder, setNewReminder] = useState({ name: "", date: "", group: "", allDay: false });
+  const [newReminder, setNewReminder] = useState({ name: "", date: "", group: "", allday: false });
 
-  const [allDay, setAllDay] = useState(false);
+  const [allday, setallday] = useState(false);
 
   const popupRef = useRef(null); // Create a ref for the popup
 
@@ -15,19 +15,23 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
 
   const currentItem = navItems.find(item => item.href === currentPath) || { href: "/", label: "Today", bgColor: "#EE6B6E" };
 
-  const handleAllDay = () => {
-    setAllDay(prevState => !prevState);
-    if (!allDay) {
-      // If allDay is being turned on, remove time from date and handle local time correctly
-      const localDate = new Date(newReminder.date);
+  const handleallday = () => {
+    setallday(prevState => !prevState);
+    const localDate = new Date(newReminder.date);
+  
+    if (!allday) {
+      // If allday is being turned on, remove time from date and handle local time correctly
       const localDateString = new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()).toISOString().slice(0, 10);
-      setNewReminder(prevState => ({ ...prevState, date: localDateString, allDay: true }));
+      setNewReminder(prevState => ({ ...prevState, date: localDateString, allday: true }));
     } else {
-      // If allDay is being turned off, add time to date
-      const localDate = new Date(newReminder.date);
-      setNewReminder(prevState => ({ ...prevState, date: convertToLocal(new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate())), allDay: false }));
+      // If allday is being turned off, retain the current time component
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const currentDate = moment().tz(timezone).format('HH:mm');
+      const localDateTimeString = `${localDate.getFullYear()}-${(localDate.getMonth() + 1).toString().padStart(2, '0')}-${(localDate.getDate()+1).toString().padStart(2, '0')}T${currentDate}`;
+      setNewReminder(prevState => ({ ...prevState, date: localDateTimeString, allday: false }));
     }
   };
+  
   
   
 
@@ -35,28 +39,27 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
   function convertToLocal(date) {
     // Ensure the input is a valid Date object
     if (!(date instanceof Date)) {
-      date = new Date(date);
+        date = new Date(date);
     }
 
     // Check if the conversion to Date was successful
     if (isNaN(date.getTime())) {
-      throw new TypeError("Invalid date");
+        throw new TypeError("Invalid date");
     }
+
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const currentTime = moment().tz(timezone);
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), currentTime.hours(), currentTime.minutes(), currentTime.seconds())).toISOString().slice(0, 16);
+    return moment(date).tz(timezone).format('YYYY-MM-DDTHH:mm:ss');
+}
 
-  }
-
-  function convertToStandardTime(date) {
-    const time = date.substring(11, 16);
-    //12:11
-    //01234
-    if (time.substring(0, 2) == "00") return "12" + time.substring(2, 5) + " AM"
-    if (time.substring(0, 2) == "12") return time + " PM"
-    if (time.substring(1, 2) > 2 && time.substring(0, 1) > 0) return (-12 + parseInt(time.substring(0, 2))) + time.substring(2, 5) + " PM"
-    else return time.substring(1, 5) + " AM";
-  }
+function convertToStandardTime(date) {
+  const time = date.substring(11, 16);
+  console.log(time);
+  const hours = parseInt(time.substring(0, 2), 10);
+  const minutes = time.substring(3, 5);
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const standardHours = ((hours + 11) % 12 + 1);
+  return `${standardHours}:${minutes} ${suffix}`;
+}
   const handleNewReminder = () => {
     setIsAdding(true);
     setNewReminder(prevState => ({
@@ -73,18 +76,19 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
 
   const handleNewReminderKeyPress = (e) => {
     if (e.key === "Enter" && newReminder.name.trim()) {
-      handleAddReminder(newReminder.name, newReminder.date, newReminder.group, newReminder.allDay);
-      setNewReminder({ name: "", date: "", group: "", allDay: false });
-      setIsAdding(false);
+        handleAddReminder(newReminder.name, convertToLocal(newReminder.date), newReminder.group, newReminder.allday);
+        setNewReminder({ name: "", date: "", group: "", allday: false });
+        setIsAdding(false);
     }
-  };
+};
+
   
   
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
         setIsAdding(false);
-        setAllDay(prevState => prevState = false);
+        setallday(prevState => prevState = false);
       }
     };
 
@@ -99,15 +103,17 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
     };
   }, [isAdding]);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const today = convertToLocal(new Date()).slice(0, 10);
+  const yesterday = convertToLocal(new Date(Date.now() - 86400000)).slice(0, 10);
+  const tomorrow = convertToLocal(new Date(Date.now() + 86400000)).slice(0, 10);
+  
 
   const filteredReminderItems = currentItem.href === "/"
-    ? reminderItems.filter(item => item.date.startsWith(today))
-    : currentItem.href === "/Upcoming"
-      ? reminderItems
-      : reminderItems.filter(item => item.group === currentItem.label);
+  ? reminderItems.filter(item => convertToLocal(item.date).startsWith(today))
+  : currentItem.href === "/Upcoming"
+    ? reminderItems.map(item => ({ ...item, date: convertToLocal(item.date) })) // Convert all items to local time
+    : reminderItems.filter(item => item.group === currentItem.label).map(item => ({ ...item, date: convertToLocal(item.date) }));
+
 
   const mS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
@@ -156,12 +162,15 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
             }}
           />
 
-          <div className="relative w-[7mm] cursor-pointer"
+          <div className="relative w-[7mm] rounded-2 cursor-pointer"
             style={{
               left: 'calc(100vw - 3.6rem)',
               top: currentPath === "/" ? '2.5rem' : '2.5rem'
             }}
-            onClick={handleNewReminder}>
+            onClick={handleNewReminder}
+               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.5v15m7.5-7.5h-15" /></svg>
           </div>
           <p
@@ -192,7 +201,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
             <input
               className="relative left-1 bg-transparent border-none focus:outline-none w-[75%]"
               style={{ colorScheme: "dark" }}
-              type={allDay ? "date" : "datetime-local"}
+              type={allday ? "date" : "datetime-local"}
               name="date"
               value={newReminder.date}
               onChange={handleNewReminderChange}
@@ -203,8 +212,8 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
               All Day: 
               <div
                     className="relative left-2 top-[3.2px] h-[20px] w-[20px] rounded-1"
-                    style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: allDay ? 'white' : 'transparent' }}
-                    onClick={handleAllDay}
+                    style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: allday ? 'white' : 'transparent' }}
+                    onClick={handleallday}
                   />
 
             </p>
@@ -264,12 +273,15 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
               }}
             />
             {index === 0 && (
-              <div className="relative w-[7mm] cursor-pointer"
+              <div className="relative w-[7mm] rounded-2 cursor-pointer"
                 style={{
                   left: 'calc(100vw - 3.6rem)',
                   top: currentPath === "/" ? '2.5rem' : '2.5rem'
                 }}
-                onClick={handleNewReminder}>
+                onClick={handleNewReminder}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.5v15m7.5-7.5h-15" /></svg>
               </div>
             )}
@@ -282,12 +294,18 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
                 }}>
                 <div className={`flex justify-between items-center relative ${x === today ? 'top-[10px]' : 'top-[4px]'}`}>
                   <div className="flex items-center space-x-2 justify-left">
-                    <div className="relative top-[-7px] h-[25px] w-[25px] rounded-full"
+                   <div className="relative top-[-7px] h-[25px] w-[25px] rounded-full transition-all duration-300"
                       style={{
                         backgroundColor: item.done ? currentItem.bgColor : 'transparent',
                         boxShadow: `inset 0 0 0 2px ${currentItem.bgColor}`
                       }}
                       onClick={() => handleCheckItem(item)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.6'; // Reduce opacity on hover
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1'; // Reset opacity on mouse leave
+                      }}
                     />
                     {item.group !== "" && (
                       <p style={{ color: colorScheme.Reminders.text }}>
@@ -301,8 +319,8 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, handleChe
                     )}
                   </div>
                   <div className="flex justify-end space-x-3">
-                    <div className="h-[14px] w-[14px] rounded-full relative top-[6.1px]" style={{ right: item.allDay ? '57.3px' : '0px',backgroundColor: (currentPath !== "/" && currentPath !=="/Upcoming") ?  navItems.bgColor : navItems.find(x => x.label === item.group)?.bgColor}}></div>
-                    <p style={{ color: colorScheme.Reminders.text }}>{item.allDay ? '' : convertToStandardTime(item.date)}</p>
+                    <div className="h-[14px] w-[14px] rounded-full relative top-[6.1px]" style={{ right: item.allday ? '67.3px' : convertToStandardTime(item.date).length>7 ? '0px' : '7.5px',backgroundColor: (currentPath !== "/" && currentPath !=="/Upcoming") ?  navItems.bgColor : navItems.find(x => x.label === item.group)?.bgColor}}></div>
+                    <p style={{ color: colorScheme.Reminders.text }}>{item.allday ? '' : convertToStandardTime(convertToLocal(item.date))}</p>
                   </div>
                 </div>
               </div>

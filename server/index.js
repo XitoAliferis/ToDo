@@ -2,24 +2,26 @@ const { sql } = require('@vercel/postgres');
 require('dotenv').config({ path: '.env.development.local' });
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
+const moment = require('moment-timezone');
+
 
 const timeZone = 'America/New_York'; // Set the desired time zone
 
-// Function to convert date to EST
-function convertToLocal(date) {
-        // Ensure the input is a valid Date object
-        if (!(date instanceof Date)) {
-            date = new Date(date);
-        }
-    
-        // Check if the conversion to Date was successful
-        if (isNaN(date.getTime())) {
-            throw new TypeError("Invalid date");
-        }
-        
-        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(),  date.getHours(), date.getMinutes(), date.getSeconds()));
+  function convertToLocal(date) {
+    // Ensure the input is a valid Date object
+    if (!(date instanceof Date)) {
+      date = new Date(date);
+    }
 
-}
+    // Check if the conversion to Date was successful
+    if (isNaN(date.getTime())) {
+      throw new TypeError("Invalid date");
+    }
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const currentTime = moment().tz(timezone);
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), currentTime.hours(), currentTime.minutes(), currentTime.seconds())).toISOString().slice(0, 16);
+
+  }
 
 async function createTable() {
     await sql`
@@ -31,7 +33,7 @@ async function createTable() {
         done BOOLEAN,
         date TIMESTAMP,
         "group" VARCHAR(255),
-        allDay BOOLEAN,
+        allday BOOLEAN,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -47,8 +49,8 @@ async function createTable() {
 
 async function preloadData() {
     const reminderItemData = [
-        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allDay: false },
-        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allDay: false  }
+        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allday: true },
+        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allday: true  }
     ];
 
     const reminderData = [
@@ -57,10 +59,10 @@ async function preloadData() {
     ];
 
     for (const x of reminderItemData) {
-        const estDate = convertToLocal(x.date).toISOString();
+        const estDate =   (x.date);
         await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allDay)
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allDay})
+        INSERT INTO ReminderItem (id, name, done, date, "group", allday)
+        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday})
         ON CONFLICT (id) DO NOTHING;
         `;
     }
@@ -77,17 +79,18 @@ async function preloadData() {
 async function setReminderItemData(x) {
     let dateString = x.date;
   
-    // If allDay is true, use the date as it is without converting to local
-    const estDate = x.allDay ? new Date(dateString).toISOString().slice(0, 10) : convertToLocal(new Date(dateString)).toISOString();
+    // If allday is true, use the date as it is without converting to local
+    const estDate = x.allday ? new Date(dateString).toISOString().slice(0, 10) : convertToLocal(new Date(dateString));
     console.log(estDate);
   
     const createdAt = new Date().toISOString(); // Get the current timestamp
   
     await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allDay, created_at)
-        VALUES (${uuidv4()}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allDay}, ${createdAt});
+        INSERT INTO ReminderItem (id, name, done, date, "group", allday, created_at)
+        VALUES (${uuidv4()}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday}, ${createdAt});
     `;
-  }
+}
+
   
 
 async function setReminderData(x) {
@@ -128,7 +131,7 @@ fastify.get('/reminderItemData', async (request, reply) => {
 fastify.post('/reminderItemData', async (request, reply) => {
     try {
         const newReminder = request.body;
-        console.log(newReminder);
+      //  console.log(newReminder);
         await setReminderItemData(newReminder);
         reply.code(201).send(newReminder);
     } catch (error) {

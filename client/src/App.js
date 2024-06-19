@@ -49,15 +49,15 @@ function App() {
 
   const handleCheckItem = async (item) => {
     try {
-      const response = await axios.post('/checkReminderItem', { id: item.id });
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
+      const response = await axios.post('/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const handleAddReminder = async (name, date, group, allDay) => {
-    const reminderObject = { name: name, done: false, date: date, group: group, allDay: allDay };
+  const handleAddReminder = async (name, date, group, allday) => {
+    const reminderObject = { name: name, done: false, date: date, group: group, allday: allday };
 
     try {
       const response = await axios.post('/reminderItemData', reminderObject);
