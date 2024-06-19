@@ -5,23 +5,6 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID library
 const moment = require('moment-timezone');
 
 
-const timeZone = 'America/New_York'; // Set the desired time zone
-
-  function convertToLocal(date) {
-    // Ensure the input is a valid Date object
-    if (!(date instanceof Date)) {
-      date = new Date(date);
-    }
-
-    // Check if the conversion to Date was successful
-    if (isNaN(date.getTime())) {
-      throw new TypeError("Invalid date");
-    }
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const currentTime = moment().tz(timezone);
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), currentTime.hours(), currentTime.minutes(), currentTime.seconds())).toISOString().slice(0, 16);
-
-  }
 
 async function createTable() {
     await sql`
@@ -80,7 +63,7 @@ async function setReminderItemData(x) {
     let dateString = x.date;
   
     // If allday is true, use the date as it is without converting to local
-    const estDate = x.allday ? new Date(dateString).toISOString().slice(0, 10) : convertToLocal(new Date(dateString));
+    const estDate =  (new Date(dateString));
     console.log(estDate);
   
     const createdAt = new Date().toISOString(); // Get the current timestamp
@@ -109,7 +92,7 @@ async function getReminderData() {
 }
 
 async function editReminderItemData(reminderItem) {
-    const estDate = convertToLocal(reminderItem.date).toISOString();
+    const estDate = (reminderItem.date).toISOString();
     await sql`
     UPDATE ReminderItem
     SET name = ${reminderItem.name}, done = ${reminderItem.done}, date = ${estDate}, "group" = ${reminderItem.group}
