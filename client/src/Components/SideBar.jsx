@@ -151,7 +151,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
               ><svg className={`absolute size-7 ${isExpanded ? 'left-[84%]' : 'left-[15%]'}  top-[15%]`} xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="white"  d="m13.5 10l4 4m0-4l-4 4m6.095 4.5H9.298a2 2 0 0 1-1.396-.568l-5.35-5.216a1 1 0 0 1 0-1.432l5.35-5.216A2 2 0 0 1 9.298 5.5h10.297c.95 0 2.223.541 2.223 1.625v9.75c0 1.084-1.273 1.625-2.223 1.625"/></svg>
               </div>
               <a
-                className={`no-underline relative ${isExpanded ? 'w-[225px] ' : ' w-[43px]'}`}
+                className={`no-underline relative ${shiftedReminder ? (isExpanded ? 'w-[225px]' : ' w-[43px]') : ''}`}
                 href={item.href}
                 style={{
                   display: 'block',
@@ -173,7 +173,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colorScheme.SideBar.reminder}
                 >
                   <div
-                    className="w-[27.5px] h-[27.5px] rounded-full"
+                    className={`w-[27.5px] h-[27.5px] rounded-full `}
                     style={{ backgroundColor: item.bgColor }}
                   />
                   {isExpanded && (
