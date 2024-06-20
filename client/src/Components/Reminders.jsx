@@ -155,7 +155,8 @@ const handleNewReminderKeyPress = async (e) => {
   const removeOutdatedCheckedItems = async () => {
     const todayDate = new Date().toISOString().split('T')[0];
     const outdatedCheckedItems = reminderItems.filter(item => 
-      item.done && new Date(item.date) < new Date(todayDate)
+      (item.done && (new Date(item.date) < new Date(todayDate))) ||
+      (item.done && isTimeBeforeNow(item.date))
     );
     
     for (const item of outdatedCheckedItems) {
@@ -184,6 +185,20 @@ const handleNewReminderKeyPress = async (e) => {
   const isDateBeforeToday = (date) => {
     return (new Date(date)) < new Date(today);
   };
+
+  const isTimeBeforeNow = (date) => {
+    const now = new Date();
+    const inputDate = new Date(date);
+  
+    // Check if the input date is today
+    const isSameDay = now.toDateString() <= inputDate.toDateString();
+  
+    // Check if the input time is before the current time
+    const isBeforeNow = inputDate < now;
+  
+    return isSameDay && isBeforeNow;
+  };
+  
 
   const formatDateLabel = (date) => {
     const dateObj = new Date(date);
@@ -445,7 +460,7 @@ const handleNewReminderKeyPress = async (e) => {
                         transition: 'top 0.3s, right 0.3s, background-color 0.3s'
                       }}>
                     </div>
-                    <p className="transition-all duration-300" style={{ color: colorScheme.Reminders.text }}>{item.allday ? '' : convertToStandardTime(item.date)}</p>
+                    <p className="transition-all duration-300" style={{ color: isTimeBeforeNow(item.date) ? '#e42f2f' : colorScheme.Reminders.text }}>{item.allday ? '' : convertToStandardTime(item.date)}</p>
                   </div>
                 </div>
               </div>
