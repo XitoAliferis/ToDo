@@ -30,6 +30,8 @@ async function createTable() {
     `;
 }
 
+
+
 async function preloadData() {
     const reminderItemData = [
         { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allday: true },
@@ -42,7 +44,7 @@ async function preloadData() {
     ];
 
     for (const x of reminderItemData) {
-        const estDate =   (x.date);
+        const estDate =  (x.date);
         await sql`
         INSERT INTO ReminderItem (id, name, done, date, "group", allday)
         VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday})
@@ -92,13 +94,25 @@ async function getReminderData() {
 }
 
 async function editReminderItemData(reminderItem) {
-    const estDate = (reminderItem.date).toISOString();
+    const estDate = (reminderItem.date);
+
     await sql`
-    UPDATE ReminderItem
-    SET name = ${reminderItem.name}, done = ${reminderItem.done}, date = ${estDate}, "group" = ${reminderItem.group}
-    WHERE id = ${reminderItem.id};
+        UPDATE ReminderItem
+        SET name = ${reminderItem.name}, done = ${reminderItem.done}, date = ${estDate}, "group" = ${reminderItem.group}, allday = ${reminderItem.allday}
+        WHERE id = ${reminderItem.id};
     `;
 }
+
+
+fastify.post('/editReminderItemData', async (request, reply) => {
+    try {
+        const reminder = request.body;
+        await editReminderItemData(reminder);
+        reply.code(201).send(reminder);
+    } catch (error) {
+        reply.code(500).send(error);
+    }
+});
 
 // Declare a route for GET /reminderItemData
 fastify.get('/reminderItemData', async (request, reply) => {
@@ -142,6 +156,29 @@ fastify.post('/reminderData', async (request, reply) => {
         reply.code(500).send(error);
     }
 });
+
+// Declare a route for DELETE /reminderData/:id
+fastify.delete('/reminderData/:id', async (request, reply) => {
+    try {
+      const { id } = request.params;
+      await sql`DELETE FROM Reminder WHERE id = ${id}`;
+      reply.code(200).send({ id });
+    } catch (error) {
+      reply.code(500).send(error);
+    }
+  });
+
+  // Declare a route for DELETE /reminderItemData/:id
+fastify.delete('/reminderItemData/:id', async (request, reply) => {
+    try {
+      const { id } = request.params;
+      await sql`DELETE FROM ReminderItem WHERE id = ${id}`;
+      reply.code(200).send({ id });
+    } catch (error) {
+      reply.code(500).send(error);
+    }
+  });
+
 
 // Declare a route for POST /checkReminderItem
 fastify.post('/checkReminderItem', async (request, reply) => {

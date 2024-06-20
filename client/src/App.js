@@ -5,6 +5,7 @@ import SideBar from './Components/SideBar';
 import Reminders from './Components/Reminders';
 import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { v4 as uuidv4 } from 'uuid';
 
 const colorScheme = [
   {
@@ -13,10 +14,10 @@ const colorScheme = [
     Reminders: { background: "#626262", text: "#FFFFFF" }
   },
   {
-    NavBar: { background: "#C5BBA7", text: "#FFFFFF" },
-    SideBar: { background: "#C5BBA7", line: "#FFFFFF", reminder: "#b0a494", text: "#FFFFFF" },
-    Reminders: { background: "#d8ccbc", text: "#FFFFFF" }
-  }
+    NavBar: { background: "#242424", text: "#FFFFFF" },
+    SideBar: { background: "#242424", line: "#FFFFFF", reminder: "#2e2e2e", text: "#FFFFFF" },
+    Reminders: { background: "#2e2e2e", text: "#FFFFFF" }
+  },
 ];
 
 function App() {
@@ -50,15 +51,16 @@ function App() {
   const handleCheckItem = async (item) => {
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
-      const response = await axios.post('/checkReminderItem', { id: item.id });
+      await axios.post('/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
   const handleAddReminder = async (name, date, group, allday) => {
-    const reminderObject = { name: name, done: false, date: date, group: group, allday: allday };
-
+    const tempId = uuidv4(); // Generate a temporary ID
+    const reminderObject = { id: tempId, name: name, done: false, date: date, group: group, allday: allday };
+  
     try {
       const response = await axios.post('/reminderItemData', reminderObject);
       setReminderItems([...reminderItems, response.data]);
@@ -66,11 +68,12 @@ function App() {
       console.error('Error:', error);
     }
   };
-
+  
   const navItems = [
     { href: "/", label: "Today", bgColor: "#EE6B6E" },
     { href: "/Upcoming", label: "Upcoming", bgColor: "#FFFFFF" },
     ...reminders.map(cls => ({
+      id: cls.id, // Include the id here
       href: `/${cls.name.replace(/\s+/g, '')}`,
       label: `${cls.name}`,
       bgColor: cls.color
@@ -102,7 +105,7 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <div className='overflow-x-hidden overflow-y-hidden h-[100vh] w-[100vh]'></div>; // Add a loading state to improve UX
+    return <div className='overflow-x-hidden overflow-y-hidden h-[100vh] w-[100vh' style={{backgroundColor: '#626262'}}></div>; // Add a loading state to improve UX
   }
 
   return (
@@ -112,6 +115,7 @@ function App() {
         navItems={navItems}
         isExpanded={isExpanded}
         reminderItems={reminderItems}
+        setReminderItems={setReminderItems}
         handleCheckItem={handleCheckItem}
         handleAddReminder={handleAddReminder}
       />
