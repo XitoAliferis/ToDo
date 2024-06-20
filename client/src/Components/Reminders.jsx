@@ -173,7 +173,7 @@ const handleNewReminderKeyPress = async (e) => {
   const tomorrow = convertToLocal(new Date(Date.now() + 86400000)).substring(0, 10)
 
   const filteredReminderItems = currentItem.href === "/"
-    ? reminderItems.filter(item => convertToLocal(item.date).startsWith(today))
+    ? reminderItems.filter(item => convertToLocal(item.date).startsWith(today)).map(item => ({ ...item, date: convertToLocal(item.date) }))
     : currentItem.href === "/Upcoming"
       ? reminderItems.map(item => item.allday ? ({ ...item, date: (item.date) }) : ({ ...item, date: convertToLocal(item.date) }))
       : reminderItems.filter(item => item.group === currentItem.label).map(item => item.allday ? ({ ...item, date: (item.date) }) : ({ ...item, date: convertToLocal(item.date) }));
@@ -186,11 +186,21 @@ const handleNewReminderKeyPress = async (e) => {
   };
 
   const formatDateLabel = (date) => {
+    const dateObj = new Date(date);
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayOfWeek = daysOfWeek[dateObj.getUTCDay()];
+
     if (date === yesterday) return 'Yesterday';
     if (date === today) return 'Today';
     if (date === tomorrow) return 'Tomorrow';
-    return `${mS[parseInt(date.substring(5, 7)) - 1]} ${date.substring(8, 10)}${date.substring(0, 4) === today.substring(0, 4) ? '' : `, ${date.substring(0, 4)}`}`;
-  };
+
+    const mS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const formattedDate = `${mS[parseInt(date.substring(5, 7)) - 1]} ${date.substring(8, 10)}${date.substring(0, 4) === today.substring(0, 4) ? '' : `, ${date.substring(0, 4)}`}`;
+    
+    return formattedDate;
+   // return `${date.substring(0,4) != today.substring(0,4) ? '' : `${dayOfWeek}, `}${formattedDate}`;
+};
+
 
   const handleReminderItemContextMenu = (e, itemId) => {
     e.preventDefault();
@@ -237,7 +247,7 @@ const handleNewReminderKeyPress = async (e) => {
               top: currentPath === "/" ? '2.5rem' : '2.5rem'
             }}
             onClick={handleNewReminder}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.35)`}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="white" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -346,7 +356,7 @@ const handleNewReminderKeyPress = async (e) => {
                   top: currentPath === "/" ? '2.5rem' : '2.5rem'
                 }}
                 onClick={handleNewReminder}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.35)`}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="white" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -364,13 +374,16 @@ const handleNewReminderKeyPress = async (e) => {
                 onContextMenu={(e) => handleReminderItemContextMenu(e, item.id)}
               >
                 <div
-                  className={`absolute top-[12%] transition-all duration-300 cursor-pointer ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-r-md bg-red-500`}
+                  className={`absolute top-[12%] transition-all duration-300 cursor-pointer ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-r-md`}
                   style={{
                     transform: shiftedReminderItem === item.id ? (isExpanded ? `translateX(${278 + 9}px)` : `translateX(${105 + 6}px)`) : (isExpanded ? `translateX(${380 + 5}px)` : `translateX(${135 + 5}px)`),
                     opacity: shiftedReminderItem === item.id ? '1' : '0',
                     zIndex: shiftedReminderItem === item.id ? '2' : '2',
                     transition: 'transform 0.3s, opacity 0.3s',
+                    backgroundColor: 'red'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9e1b1b'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'red'}
                   onClick = {() => handleDeleteReminderItem(item.id)}
                 >
                   <svg className={`absolute size-7 ${isExpanded ? 'left-[18%]' : 'left-[13%]'}  top-[13%]`} xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
@@ -385,6 +398,8 @@ const handleNewReminderKeyPress = async (e) => {
                     zIndex: shiftedReminderItem === item.id ? '2' : '2',
                     transition: 'transform 0.3s, opacity 0.3s',
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d4cb1e'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(253, 224, 71)'}
                   onClick = {() => handleOpenEditMenu(item)}
                 >
                   <svg className={`absolute size-7 ${isExpanded ? 'left-[14%]' : 'left-[13%]'}  top-[11%]`} xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">

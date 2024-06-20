@@ -9,14 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 const colorScheme = [
   {
-    NavBar: { background: "#4F4F4F", text: "#FFFFFF" },
-    SideBar: { background: "#4F4F4F", line: "#FFFFFF", reminder: "#404040", text: "#FFFFFF" },
-    Reminders: { background: "#626262", text: "#FFFFFF" }
-  },
-  {
     NavBar: { background: "#242424", text: "#FFFFFF" },
     SideBar: { background: "#242424", line: "#FFFFFF", reminder: "#2e2e2e", text: "#FFFFFF" },
     Reminders: { background: "#2e2e2e", text: "#FFFFFF" }
+  },
+  {
+    NavBar: { background: "#4F4F4F", text: "#FFFFFF" },
+    SideBar: { background: "#4F4F4F", line: "#FFFFFF", reminder: "#404040", text: "#FFFFFF" },
+    Reminders: { background: "#626262", text: "#FFFFFF" }
   },
 ];
 

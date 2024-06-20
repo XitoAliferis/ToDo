@@ -7,8 +7,8 @@ const moment = require('moment-timezone');
 
 
 async function createTable() {
-    await sql`
-    DROP TABLE reminder, reminderitem`;
+    // await sql`
+    // DROP TABLE reminder, reminderitem`;
     await sql`
       CREATE TABLE IF NOT EXISTS ReminderItem (
         id VARCHAR(255) PRIMARY KEY,
@@ -40,7 +40,7 @@ async function preloadData() {
 
     const reminderData = [
         { id: uuidv4(), name: "Sarah's Reminders", color: "#febed4" },
-        { id: uuidv4(), name: "Xito's Reminders", color: "#acbda1" },
+        { id: uuidv4(), name: "Xito's Reminders", color: "#4d79ff" },
     ];
 
     for (const x of reminderItemData) {
@@ -204,7 +204,7 @@ fastify.post('/checkReminderItem', async (request, reply) => {
 const start = async () => {
     try {
         await createTable();
-        await preloadData();
+      //  await preloadData();
         await fastify.listen({ port: 5000, host: '0.0.0.0' });
         fastify.log.info(`Server started on port 5000`);
     } catch (err) {

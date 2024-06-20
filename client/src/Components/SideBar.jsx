@@ -113,14 +113,14 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
         <div
           className="absolute top-[4.5rem] left-[1rem] w-[7mm] rounded-2 cursor-pointer transition-all duration-300"
           onClick={handleNewReminder}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.55)`}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="white" d="M12 4.5v15m7.5-7.5h-15" /></svg>
         </div>
       )}
       <div className={`max-sm:hidden absolute top-[4.4rem] left-[12rem] w-[8.5mm] rounded-2 cursor-pointer transition-all duration-300 ${isExpanded ? 'left-[12rem] rotate-0' : 'left-[1rem] rotate-180'}`} onClick={handleToggle}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.1)`}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.55)`}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="8mm" width="8.5mm" viewBox="0 0 16 9"><path fill="white" d="M12.5 5h-9c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h9c.28 0 .5.22.5.5s-.22.5-.5.5" /><path fill="white" d="M6 8.5a.47.47 0 0 1-.35-.15l-3.5-3.5c-.2-.2-.2-.51 0-.71L5.65.65c.2-.2.51-.2.71 0s.2.51 0 .71L3.21 4.51l3.15 3.15c.2.2.2.51 0 .71c-.1.1-.23.15-.35.15Z" /></svg>
@@ -145,13 +145,13 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
                   opacity: shiftedReminder === index ? '1' : '0',
                   zIndex: 0,
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#cf0202'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9e1b1b'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'red'}
                 onClick={() => handleDeleteReminder(item.id)}
               ><svg className={`absolute size-7 ${isExpanded ? 'left-[84%]' : 'left-[15%]'}  top-[15%]`} xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="white"  d="m13.5 10l4 4m0-4l-4 4m6.095 4.5H9.298a2 2 0 0 1-1.396-.568l-5.35-5.216a1 1 0 0 1 0-1.432l5.35-5.216A2 2 0 0 1 9.298 5.5h10.297c.95 0 2.223.541 2.223 1.625v9.75c0 1.084-1.273 1.625-2.223 1.625"/></svg>
               </div>
               <a
-                className="no-underline relative"
+                className={`no-underline relative ${isExpanded ? 'w-[225px] ' : ' w-[43px]'}`}
                 href={item.href}
                 style={{
                   display: 'block',
@@ -169,7 +169,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
                     opacity: getOpacity(index),
                     transition: 'transform 0.3s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#2C2C2C"}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#101010"}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colorScheme.SideBar.reminder}
                 >
                   <div
