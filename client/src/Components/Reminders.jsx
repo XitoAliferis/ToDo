@@ -389,7 +389,7 @@ const handleNewReminderKeyPress = async (e) => {
                 onContextMenu={(e) => handleReminderItemContextMenu(e, item.id)}
               >
                 <div
-                  className={`absolute top-[12%] transition-all duration-300 cursor-pointer ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-r-md`}
+                  className={`absolute ${(x === today) ? 'top-[12%]' : 'top-[0%]'} transition-all duration-300 cursor-pointer ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-r-md`}
                   style={{
                     transform: shiftedReminderItem === item.id ? (isExpanded ? `translateX(${278 + 9}px)` : `translateX(${105 + 6}px)`) : (isExpanded ? `translateX(${380 + 5}px)` : `translateX(${135 + 5}px)`),
                     opacity: shiftedReminderItem === item.id ? '1' : '0',
@@ -406,7 +406,7 @@ const handleNewReminderKeyPress = async (e) => {
                   </svg>
                 </div>
                 <div
-                  className={`absolute top-[12%] transition-all cursor-pointer duration-300 ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-l-md bg-yellow-300`}
+                  className={`absolute ${(x === today) ? 'top-[12%]' : 'top-[0%]'} transition-all cursor-pointer duration-300 ${isExpanded ? 'left-[calc(100%-15rem)]' : 'left-[calc(100%-4rem)]'} h-[35px] w-[39px] rounded-l-md bg-yellow-300`}
                   style={{
                     transform: shiftedReminderItem === item.id ? (isExpanded ? `translateX(${244 + 5}px)` : `translateX(${69 + 4}px)`) : (isExpanded ? `translateX(${346 + 5}px)` : `translateX(${99 + 5}px)`),
                     opacity: shiftedReminderItem === item.id ? '1' : '0',
