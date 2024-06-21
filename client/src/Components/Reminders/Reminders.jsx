@@ -198,7 +198,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   };
 
   return (
-    <div className="absolute top-0 left-0 overflow-x-hidden w-[100vw] h-[100%] transition-all duration-300" style={{ backgroundColor: colorScheme.Reminders.background }}>
+    <div className="absolute top-0 left-0 overflow-x-hidden scrollbar-hide  w-[100vw] h-[100%] transition-all duration-300" style={{ backgroundColor: colorScheme.Reminders.background }}>
       <ReminderHeader navItems={navItems} colorScheme={colorScheme} isExpanded={isExpanded} />
       <NewReminderPopup
         isAdding={isAdding}
