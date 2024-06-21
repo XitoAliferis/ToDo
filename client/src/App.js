@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import axios from 'axios';
 import SideBar from './Components/SideBar';
-import Reminders from './Components/Reminders';
+import Reminders from './Components/Reminders/Reminders';
 import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,6 +24,7 @@ function App() {
   const [reminders, setReminders] = useState([]);
   const [reminderItems, setReminderItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false); // Add state to track if an update is in progress
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -49,25 +50,30 @@ function App() {
   }, [reminderItems]);
 
   const handleCheckItem = async (item) => {
+    setIsUpdating(true);
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
       await axios.post('/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
     }
+    setIsUpdating(false);
   };
 
   const handleAddReminder = async (name, date, group, allday) => {
     const tempId = uuidv4(); // Generate a temporary ID
     const reminderObject = { id: tempId, name: name, done: false, date: date, group: group, allday: allday };
-  
+    setIsUpdating(true); // Set updating state
+
     try {
-      const response = await axios.post('/reminderItemData', reminderObject);
-      setReminderItems([...reminderItems, response.data]);
+        const response = await axios.post('/reminderItemData', reminderObject);
+        setReminderItems([...reminderItems, response.data]);
     } catch (error) {
-      console.error('Error:', error);
+        console.error('Error:', error);
     }
-  };
+    setIsUpdating(false); // Clear updating state
+};
+
   
   const navItems = [
     { href: "/", label: "Today", bgColor: "#EE6B6E" },
@@ -118,6 +124,8 @@ function App() {
         setReminderItems={setReminderItems}
         handleCheckItem={handleCheckItem}
         handleAddReminder={handleAddReminder}
+        isUpdating={isUpdating} // Pass isUpdating to Reminders component
+        setIsUpdating={setIsUpdating}
       />
       <SideBar
         colorScheme={colorScheme[0]}
@@ -126,6 +134,7 @@ function App() {
         navItems={navItems}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
+        setIsUpdating={setIsUpdating}
       />
       <NavBar colorScheme={colorScheme[0]} />
     </Router>
