@@ -35,27 +35,27 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     }
   };
 
-  
+
   const handleDeleteReminderItem = async (id) => {
     setIsUpdating(true); // Set updating state
     try {
       setReminderItems(reminderItems.filter(reminder => reminder.id !== id));
-        const response = await axios.delete(`/reminderItemData/${id}`);
-        if (response.status === 200 && response.data.success) {
-            
-            setShiftedReminderItem(!shiftedReminderItem);
-        } else {
-            console.error('Failed to delete reminder:', response.data.error);
-        }
-    } catch (error) {
-        console.error('Error deleting reminder:', error);
-    } finally {
-        setIsUpdating(false); // Clear updating state
-    }
-};
+      const response = await axios.delete(`/reminderItemData/${id}`);
+      if (response.status === 200 && response.data.success) {
 
-  
-  
+        setShiftedReminderItem(!shiftedReminderItem);
+      } else {
+        console.error('Failed to delete reminder:', response.data.error);
+      }
+    } catch (error) {
+      console.error('Error deleting reminder:', error);
+    } finally {
+      setIsUpdating(false); // Clear updating state
+    }
+  };
+
+
+
 
   const handleEditReminderItem = async (reminder) => {
     setIsUpdating(true); // Set updating state
@@ -71,13 +71,13 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const isTimeBeforeNow = (date) => {
     const now = new Date();
     const inputDate = new Date(date);
-  
+
     // Check if the input date is today
     const isSameDay = now.toDateString() <= inputDate.toDateString();
-  
+
     // Check if the input time is before the current time
     const isBeforeNow = inputDate < now;
-  
+
     return isSameDay && isBeforeNow;
   };
 
@@ -86,7 +86,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setEditingReminder(null); // Clear the editing state
     setNewReminder({ name: "", date: convertToLocal(new Date()), group: "", allday: false });
   };
-  
+
   const handleNewReminderChange = (e) => {
     const { name, value } = e.target;
     setNewReminder(prevState => ({
@@ -149,7 +149,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isAdding, shiftedReminderItem]);
-  
+
 
   useEffect(() => {
     setShiftedReminderItem(null);
@@ -157,7 +157,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
 
   const removeOutdatedCheckedItems = async () => {
     const todayDate = new Date().toISOString().split('T')[0];
-    const outdatedCheckedItems = reminderItems.filter(item => 
+    const outdatedCheckedItems = reminderItems.filter(item =>
       (item.done && (new Date(item.date) < new Date(todayDate)) && !item.allday) ||
       (item.done && isTimeBeforeNow(item.date) && !item.allday)
     );
@@ -176,15 +176,15 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const tomorrow = convertToLocal(new Date(Date.now() + 86400000)).substring(0, 10);
 
   const filteredReminderItems = currentItem.href === "/"
-  ? reminderItems
-      .filter(item => convertToLocal(item.date).startsWith(today))
-      .map(item => ({ ...item, date: convertToLocal(item.date) }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-  : currentItem.href === "/Upcoming"
     ? reminderItems
+      .filter(item => (item.date).startsWith(today))
+      .map(item => item.allday ? ({ ...item, date: item.date }) : ({ ...item, date: convertToLocal(item.date) }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+    : currentItem.href === "/Upcoming"
+      ? reminderItems
         .map(item => item.allday ? ({ ...item, date: item.date }) : ({ ...item, date: convertToLocal(item.date) }))
         .sort((a, b) => new Date(a.date) - new Date(b.date))
-    : reminderItems
+      : reminderItems
         .filter(item => item.group === currentItem.label)
         .map(item => item.allday ? ({ ...item, date: item.date }) : ({ ...item, date: convertToLocal(item.date) }))
         .sort((a, b) => new Date(a.date) - new Date(b.date))
