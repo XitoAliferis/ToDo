@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
+import { auth } from '../firebase.js';
+import useSwipe from './Reminders/Swipe.js';
 
 const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, setIsExpanded, setIsUpdating }) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -70,7 +72,11 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
 
   const handleNewReminderKeyPress = async (e) => {
     if (e.key === "Enter" && newReminder.trim()) {
-      const newReminderObject = {id: uuidv4(), name: newReminder, component: "/", color: newColor };
+      if (newReminder.trim().toLowerCase() === "daily") {
+        alert('The name "Daily" is not allowed.');
+        return;
+      }
+      const newReminderObject = {id: uuidv4(), name: newReminder, component: "/", color: newColor, userId: auth.currentUser?.uid };
       try {
         const response = await axios.post('/reminderData', newReminderObject);
         setReminders([
@@ -96,11 +102,25 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
   const handleContextMenu = (e, index) => {
     e.preventDefault();
     e.stopPropagation();
+    if (index == null) setShiftedReminder(null)
     if (index > 1) {
       setShiftedReminder(index);
     }
   };
 
+  const handleSwipeLeft = (e, index) => {
+    handleContextMenu(e, index);
+  };
+  const handleSwipeRight = (e, item) => {
+    handleContextMenu(e, null);
+  };
+  
+  const swipeHandlers = useSwipe(
+    handleSwipeLeft,
+    handleSwipeRight,
+    null, // onSwipeUp
+    null  // onSwipeDown
+  );
 
   const handleDeleteReminder = async (id) => {
     setIsUpdating(true); // Set updating state
@@ -126,6 +146,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
     const opacity = Math.max(1 - scrollY / (itemOffset + 40), 0);
     return opacity;
   };
+  
 
   return (
     <div
@@ -136,7 +157,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
       {isExpanded && (
         <div
           className="absolute top-[4.5rem] left-[1rem] w-[7mm] rounded-2 cursor-pointer transition-all duration-300"
-          onClick={handleNewReminder}
+          onClick={() => { if (auth.currentUser) handleNewReminder(); }}
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.55)`}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
         >
@@ -152,7 +173,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
       <div className={`pt-[6.5rem] max-sm:pt-[4.2rem] overflow-y-auto overflow-x-hidden max-h-full flex flex-col space-y-[15px] ${isExpanded ? 'pl-[0%]' : 'pl-[0rem]'} scrollbar-hide sidebar-content`}>
         {navItems.map((item, index) => (
           <React.Fragment key={index}>
-            {index === 2 && (
+            {index === 3 && (
               <hr
                 className={`opacity-70 h-[1.4px] relative left-[calc((2.3rem-27.8px))] ${isExpanded ? 'w-[13.9rem]' : 'w-[2.8rem]'} transition-all duration-300`}
                 style={{
@@ -184,6 +205,9 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
                   transition: 'transform 0.3s',
                 }}
                 onContextMenu={(e) => handleContextMenu(e, index)}
+                onTouchStart={(e) => swipeHandlers.onTouchStart(e, index)} // Pass item to swipe handlers
+                onTouchMove={(e) => swipeHandlers.onTouchMove(e, index)}
+                onTouchEnd={(e) => swipeHandlers.onTouchEnd(e, index)}
               >
                 <div
                   className={`relative h-[40px] rounded-[10px] flex items-center cursor-pointer transition-all duration-300 left-[0.7rem] ${isExpanded ? 'w-[13.5rem]' : 'w-[2.6rem]'}`}

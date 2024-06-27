@@ -6,6 +6,7 @@ import Reminders from './Components/Reminders/Reminders';
 import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
+import { auth, onAuthStateChanged, getRedirectResult } from './firebase.js';
 
 const colorScheme = [
   {
@@ -24,27 +25,59 @@ function App() {
   const [reminders, setReminders] = useState([]);
   const [reminderItems, setReminderItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false); // Add state to track if an update is in progress
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setIsLoading(true);
-    try {
-      const [reminderResponse, reminderItemResponse] = await Promise.all([
-        axios.get('/reminderData'),
-        axios.get('/reminderItemData')
-      ]);
-      setReminders(reminderResponse.data);
-      setReminderItems(reminderItemResponse.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    setIsLoading(false);
+    const handleAuthStateChange = new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+
+      setTimeout(() => {
+        unsubscribe();
+        resolve(null);
+      }, 2000);
+    });
+
+    handleAuthStateChange.then(async (user) => {
+      if (!user) {
+        const redirectResult = await getRedirectResult(auth).catch(() => null);
+        if (redirectResult?.user) {
+          user = redirectResult.user;
+        }
+      }
+
+      if (user) {
+        try {
+          const userId = user.uid;
+          console.log('Fetching data for userId:', userId);
+          const [reminderResponse, reminderItemResponse] = await Promise.all([
+            axios.get('/reminderData', { params: { userId } }),
+            axios.get('/reminderItemData', { params: { userId } })
+          ]);
+          console.log('Reminder data:', reminderResponse.data);
+          console.log('Reminder item data:', reminderItemResponse.data);
+          setReminders(reminderResponse.data);
+          setReminderItems(reminderItemResponse.data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      } else {
+        console.log('No user logged in, proceeding without user data');
+        setReminders([]); // Set default reminders if needed
+        setReminderItems([]); // Set default reminder items if needed
+      }
+      setIsLoading(false);
+    });
   }, []);
+
+
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
   useEffect(() => {
     localStorage.setItem('reminderItems', JSON.stringify(reminderItems));
   }, [reminderItems]);
@@ -53,6 +86,7 @@ function App() {
     setIsUpdating(true);
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
+      if (item.group === "Daily") await axios.post('/editReminderItemData', { ...item, date: item.date })
       await axios.post('/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
@@ -61,26 +95,27 @@ function App() {
   };
 
   const handleAddReminder = async (name, date, group, allday) => {
-    const tempId = uuidv4(); // Generate a temporary ID
-    const reminderObject = { id: tempId, name: name, done: false, date: date, group: group, allday: allday };
-    setIsUpdating(true); // Set updating state
+    const tempId = uuidv4();
+    const userId = auth.currentUser?.uid;
+    const reminderObject = { id: tempId, name, done: false, date, group, allday, userId };
+    setIsUpdating(true);
 
     try {
-        const response = await axios.post('/reminderItemData', reminderObject);
-        setReminderItems([...reminderItems, response.data]);
+      const response = await axios.post('/reminderItemData', reminderObject);
+      setReminderItems([...reminderItems, response.data]);
     } catch (error) {
-        console.error('Error:', error);
+      console.error('Error:', error);
     }
-    setIsUpdating(false); // Clear updating state
-};
+    setIsUpdating(false);
+  };
 
-  
   const navItems = [
     { href: "/", label: "Today", bgColor: "#EE6B6E" },
     { href: "/Upcoming", label: "Upcoming", bgColor: "#FFFFFF" },
+    { href: "/Daily", label: "Daily", bgColor: "#F2F4AF" },
     ...reminders.map(cls => ({
-      id: cls.id, // Include the id here
-      href: `/${cls.name.replace(/\s+/g, '')}`,
+      id: cls.id,
+      href: `/${cls.id}`,
       label: `${cls.name}`,
       bgColor: cls.color
     }))
@@ -110,23 +145,56 @@ function App() {
     };
   }, []);
 
+  const handleEditReminder = async (updatedReminder) => {
+    try {
+      setReminders(prevItems => 
+        prevItems.map(item => 
+            item.id === updatedReminder.id ? updatedReminder : item
+        )
+    );
+        const response = await axios.post(`/editReminderData`, updatedReminder);
+        if (response.data.success) {
+            
+        } else {
+            console.error('Failed to update reminder:', response.data.error);
+        }
+    } catch (error) {
+        console.error('Error editing reminder:', error);
+    }
+};
+
+  
+
+
   if (isLoading) {
-    return <div className='overflow-x-hidden overflow-y-hidden h-[100vh] w-[100vh' style={{backgroundColor: '#626262'}}></div>; // Add a loading state to improve UX
+    return <div className='overflow-x-hidden overflow-y-hidden h-[100vh] w-[100vh' style={{ backgroundColor: '#626262' }}></div>;
   }
 
   return (
     <Router>
-      <Reminders
-        colorScheme={colorScheme[0]}
-        navItems={navItems}
-        isExpanded={isExpanded}
-        reminderItems={reminderItems}
-        setReminderItems={setReminderItems}
-        handleCheckItem={handleCheckItem}
-        handleAddReminder={handleAddReminder}
-        isUpdating={isUpdating} // Pass isUpdating to Reminders component
-        setIsUpdating={setIsUpdating}
-      />
+    {auth.currentUser?.uid !== undefined && (
+  <Reminders
+    colorScheme={colorScheme[0]}
+    navItems={navItems}
+    isExpanded={isExpanded}
+    reminderItems={reminderItems}
+    setReminderItems={setReminderItems}
+    handleCheckItem={handleCheckItem}
+    handleAddReminder={handleAddReminder}
+    isUpdating={isUpdating}
+    setIsUpdating={setIsUpdating}
+    handleEditReminder={handleEditReminder}
+  />
+)}
+{auth.currentUser?.uid === undefined && (
+  <div 
+    className='flex items-center justify-center  h-screen w-screen'
+    style={{ backgroundColor: colorScheme[0].Reminders.background, color: colorScheme[0].Reminders.text}}
+  >
+    You are Logged Out
+  </div>
+)}
+
       <SideBar
         colorScheme={colorScheme[0]}
         reminders={reminders}

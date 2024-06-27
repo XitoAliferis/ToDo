@@ -17,6 +17,7 @@ async function createTable() {
         date TIMESTAMP,
         "group" VARCHAR(255),
         allday BOOLEAN,
+        userId VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -25,7 +26,9 @@ async function createTable() {
       CREATE TABLE IF NOT EXISTS Reminder (
         id VARCHAR(255) PRIMARY KEY,
         name VARCHAR(255),
-        color VARCHAR(255)
+        color VARCHAR(255),
+        userId VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
 }
@@ -33,33 +36,35 @@ async function createTable() {
 
 
 async function preloadData() {
+    testUser = "FayuthArx5ZR0riuhG5uzL6ab8x2";
     const reminderItemData = [
-        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allday: true },
-        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allday: true  }
+        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allday: true, userId: testUser, created_at: new Date().toISOString() },
+        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allday: true, userId: testUser, created_at: new Date().toISOString() }
     ];
 
     const reminderData = [
-        { id: uuidv4(), name: "Sarah's Reminders", color: "#febed4" },
-        { id: uuidv4(), name: "Xito's Reminders", color: "#4d79ff" },
+        { id: uuidv4(), name: "Sarah's Reminders", color: "#febed4", userId: testUser, created_at: new Date().toISOString() },
+        { id: uuidv4(), name: "Xito's Reminders", color: "#4d79ff", userId: testUser, created_at: new Date(new Date().getTime() + 1000).toISOString() }
     ];
+    
 
     for (const x of reminderItemData) {
-        const estDate = new Date(x.date);
         await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allday)
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday})
+        INSERT INTO ReminderItem (id, name, done, date, "group", allday, userId, created_at)
+        VALUES (${x.id}, ${x.name}, ${x.done}, ${new Date(x.date)}, ${x.group}, ${x.allday}, ${x.userId}, ${x.created_at})
         ON CONFLICT (id) DO NOTHING;
         `;
     }
 
     for (const x of reminderData) {
         await sql`
-        INSERT INTO Reminder (id, name, color)
-        VALUES (${x.id}, ${x.name}, ${x.color})
+        INSERT INTO Reminder (id, name, color, userId, created_at)
+        VALUES (${x.id}, ${x.name}, ${x.color}, ${x.userId}, ${x.created_at})
         ON CONFLICT (id) DO NOTHING;
         `;
     }
 }
+
 
 
 async function setReminderItemData(x) {
@@ -67,13 +72,12 @@ async function setReminderItemData(x) {
 
     // If allday is true, use the date as it is without converting to local
     const estDate = new Date(dateString);
-    console.log(estDate);
 
     const createdAt = new Date().toISOString(); // Get the current timestamp
 
     await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allday, created_at)
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday}, ${createdAt})
+        INSERT INTO ReminderItem (id, name, done, date, "group", allday, userId, created_at)
+        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday},${x.userId}, ${createdAt})
         ON CONFLICT (id) DO NOTHING;
     `;
 }
@@ -82,21 +86,24 @@ async function setReminderItemData(x) {
   
 
 async function setReminderData(x) {
+    
+    const createdAt = new Date().toISOString(); // Get the current timestamp
+
     await sql`
-        INSERT INTO Reminder (id, name, color)
-        VALUES (${x.id}, ${x.name}, ${x.color})
+        INSERT INTO Reminder (id, name, color, userId, created_at)
+        VALUES (${x.id}, ${x.name}, ${x.color}, ${x.userId}, ${createdAt})
         ON CONFLICT (id) DO NOTHING;
     `;
 }
 
 
-async function getReminderItemData() {
-    return await sql`SELECT * FROM ReminderItem ORDER BY date;`;
-}
-
-async function getReminderData() {
-    return await sql`SELECT * FROM Reminder;`;
-}
+async function getReminderItemData(userId) {
+    return await sql`SELECT * FROM ReminderItem WHERE userId = ${userId} ORDER BY date;`;
+  }
+  
+  async function getReminderData(userId) {
+    return await sql`SELECT * FROM Reminder WHERE userId = ${userId} ORDER BY created_at;`;
+  }
 
 async function editReminderItemData(reminderItem) {
     const estDate = (reminderItem.date);
@@ -119,46 +126,67 @@ fastify.post('/editReminderItemData', async (request, reply) => {
     }
 });
 
-// Declare a route for GET /reminderItemData
+async function editReminderData(reminder) {
+    await sql`
+        UPDATE Reminder
+        SET name = ${reminder.name}, color = ${reminder.color}
+        WHERE id = ${reminder.id};
+    `;
+}
+
+
+
+
+fastify.post('/editReminderData', async (request, reply) => {
+    try {
+        const reminder = request.body;
+        await editReminderData(reminder);
+        reply.code(200).send({ success: true, reminder });
+    } catch (error) {
+        reply.code(500).send({ success: false, error: error.message });
+    }
+});
+
+
 fastify.get('/reminderItemData', async (request, reply) => {
     try {
-        const reminderItemDataSQL = await getReminderItemData();
+        const { userId } = request.query;
+        const reminderItemDataSQL = await getReminderItemData(userId);
         return reminderItemDataSQL.rows;
     } catch (error) {
         reply.code(500).send(error);
     }
 });
 
-// Declare a route for POST /reminderItemData
-fastify.post('/reminderItemData', async (request, reply) => {
+  fastify.post('/reminderItemData', async (request, reply) => {
     try {
-        const newReminder = request.body;
-        await setReminderItemData(newReminder);
-        reply.code(201).send(newReminder);
+      const newReminder = request.body;
+      await setReminderItemData(newReminder);
+      reply.code(201).send(newReminder);
     } catch (error) {
-        reply.code(500).send(error);
+      reply.code(500).send(error);
     }
-});
-// Declare a route for GET /reminderData
-fastify.get('/reminderData', async (request, reply) => {
+  });
+  
+  fastify.get('/reminderData', async (request, reply) => {
     try {
-        const reminderDataSQL = await getReminderData();
+        const { userId } = request.query;
+        const reminderDataSQL = await getReminderData(userId);
         return reminderDataSQL.rows;
     } catch (error) {
         reply.code(500).send(error);
     }
 });
-
-// Declare a route for POST /reminderData
-fastify.post('/reminderData', async (request, reply) => {
+  
+  fastify.post('/reminderData', async (request, reply) => {
     try {
-        const newReminder = request.body;
-        await setReminderData(newReminder);
-        reply.code(201).send(newReminder);
+      const newReminder = request.body;
+      await setReminderData(newReminder);
+      reply.code(201).send(newReminder);
     } catch (error) {
-        reply.code(500).send(error);
+      reply.code(500).send(error);
     }
-});
+  });
 
 // DELETE /reminderItemData/:id route
 fastify.delete('/reminderItemData/:id', async (request, reply) => {
@@ -182,22 +210,29 @@ fastify.delete('/reminderData/:id', async (request, reply) => {
     }
 });
 // Declare a route for POST /checkReminderItem
+// Update the check status of a reminder item
+async function toggleReminderItemDone(id) {
+    const reminderItem = await sql`SELECT * FROM ReminderItem WHERE id = ${id}`;
+    if (reminderItem.rowCount > 0) {
+        const newDoneState = !reminderItem.rows[0].done;
+        await sql`
+            UPDATE ReminderItem
+            SET done = ${newDoneState}
+            WHERE id = ${id};
+        `;
+        return { ...reminderItem.rows[0], done: newDoneState };
+    } else {
+        throw new Error('Reminder item not found');
+    }
+}
+
 fastify.post('/checkReminderItem', async (request, reply) => {
     try {
         const { id } = request.body;
-        const reminderItemDataSQL = await getReminderItemData();
-        const updatedItems = reminderItemDataSQL.rows.map(async reminder => {
-            if (reminder.id === id) {
-                await editReminderItemData({ id: reminder.id, name: reminder.name, done: !reminder.done, date: reminder.date, group: reminder.group, allday: reminder.allday});
-                return { ...reminder, done: !reminder.done };
-            }
-            return reminder;
-        });
-
-        const resolvedUpdatedItems = await Promise.all(updatedItems);
-        reply.code(200).send(resolvedUpdatedItems);
+        const updatedReminder = await toggleReminderItemDone(id);
+        reply.code(200).send(updatedReminder);
     } catch (error) {
-        reply.code(500).send(error);
+        reply.code(500).send({ success: false, error: error.message });
     }
 });
 
@@ -206,7 +241,7 @@ fastify.post('/checkReminderItem', async (request, reply) => {
 const start = async () => {
     try {
         await createTable();
-      // await preloadData();
+   //    await preloadData();
         await fastify.listen({ port: 5000, host: '0.0.0.0' });
         fastify.log.info(`Server started on port 5000`);
     } catch (err) {
