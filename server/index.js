@@ -7,8 +7,8 @@ const moment = require('moment-timezone');
 
 
 async function createTable() {
-    // await sql`
-    // DROP TABLE reminder, reminderitem`;
+    await sql`
+    DROP TABLE reminder, reminderitem`;
     await sql`
       CREATE TABLE IF NOT EXISTS ReminderItem (
         id VARCHAR(255) PRIMARY KEY,
@@ -17,6 +17,7 @@ async function createTable() {
         date TIMESTAMP,
         "group" VARCHAR(255),
         allday BOOLEAN,
+        daily BOOLEAN,
         userId VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -66,7 +67,6 @@ async function preloadData() {
 }
 
 
-
 async function setReminderItemData(x) {
     let dateString = x.date;
 
@@ -74,10 +74,10 @@ async function setReminderItemData(x) {
     const estDate = new Date(dateString);
 
     const createdAt = new Date().toISOString(); // Get the current timestamp
-
+    console.log(x.daily)
     await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allday, userId, created_at)
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday},${x.userId}, ${createdAt})
+        INSERT INTO ReminderItem (id, name, done, date, "group", allday, daily, userId, created_at)
+        VALUES (${x.id}, ${x.name}, ${x.done}, ${estDate}, ${x.group}, ${x.allday},${x.daily},${x.userId}, ${createdAt})
         ON CONFLICT (id) DO NOTHING;
     `;
 }
@@ -110,7 +110,7 @@ async function editReminderItemData(reminderItem) {
 
     await sql`
         UPDATE ReminderItem
-        SET name = ${reminderItem.name}, done = ${reminderItem.done}, date = ${estDate}, "group" = ${reminderItem.group}, allday = ${reminderItem.allday}
+        SET name = ${reminderItem.name}, done = ${reminderItem.done}, date = ${estDate}, "group" = ${reminderItem.group}, allday = ${reminderItem.allday}, daily = ${reminderItem.daily}
         WHERE id = ${reminderItem.id};
     `;
 }
@@ -241,7 +241,7 @@ fastify.post('/checkReminderItem', async (request, reply) => {
 const start = async () => {
     try {
         await createTable();
-   //    await preloadData();
+       await preloadData();
         await fastify.listen({ port: 5000, host: '0.0.0.0' });
         fastify.log.info(`Server started on port 5000`);
     } catch (err) {

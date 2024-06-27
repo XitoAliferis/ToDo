@@ -86,7 +86,7 @@ function App() {
     setIsUpdating(true);
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
-      if (item.group === "Daily") await axios.post('/editReminderItemData', { ...item, date: item.date })
+      if (item.daily) await axios.post('/editReminderItemData', { ...item, date: item.date })
       await axios.post('/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
@@ -94,12 +94,13 @@ function App() {
     setIsUpdating(false);
   };
 
-  const handleAddReminder = async (name, date, group, allday) => {
+  const handleAddReminder = async (name, date, group, allday, daily) => {
     const tempId = uuidv4();
     const userId = auth.currentUser?.uid;
-    const reminderObject = { id: tempId, name, done: false, date, group, allday, userId };
+    if (daily) group = "Daily";
+    const reminderObject = { id: tempId, name, done: false, date, group, allday, daily, userId };
     setIsUpdating(true);
-
+  
     try {
       const response = await axios.post('/reminderItemData', reminderObject);
       setReminderItems([...reminderItems, response.data]);

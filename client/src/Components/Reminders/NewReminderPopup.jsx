@@ -6,6 +6,8 @@ const NewReminderPopup = ({
   newReminder,
   setNewReminder,
   allday,
+  daily,
+  setDaily,
   handleAllday,
   navItems,
   currentItem,
@@ -16,7 +18,7 @@ const NewReminderPopup = ({
   if (!isAdding) return null;
 
   return (
-    <div ref={popupRef} className="absolute h-[300px] w-[225px] rounded-[6%] z-1" style={{top: currentItem.href === "/" ? '13%' : '17%' ,backgroundColor: "#404040", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
+    <div ref={popupRef} className="absolute h-[355px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "#404040", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
       <div className="relative top-[9%] left-[5%] space-y-[20px]">
         <p className="text-white font-thin flex">Task:
           <input
@@ -50,6 +52,21 @@ const NewReminderPopup = ({
             onClick={handleAllday}
           />
         </p>
+        <p className="text-white font-thin flex ">
+          Daily:
+          <div
+            className="relative left-2 top-[3.2px] h-[20px] w-[20px] rounded-1"
+            style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: daily ? 'white' : 'transparent' }}
+            onClick={() => {
+              setDaily(prevState => {
+                const newDailyState = !prevState;
+                setNewReminder(prev => ({ ...prev, daily: newDailyState }));  // Update newReminder state
+                return newDailyState;
+              });
+            }}
+          />
+        </p>
+
         <p className="text-white font-thin flex">Group:
           {(currentItem.href === "/" || currentItem.href === "/Upcoming") && (
             <NavDropdown

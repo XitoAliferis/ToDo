@@ -72,10 +72,6 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
 
   const handleNewReminderKeyPress = async (e) => {
     if (e.key === "Enter" && newReminder.trim()) {
-      if (newReminder.trim().toLowerCase() === "daily") {
-        alert('The name "Daily" is not allowed.');
-        return;
-      }
       const newReminderObject = {id: uuidv4(), name: newReminder, component: "/", color: newColor, userId: auth.currentUser?.uid };
       try {
         const response = await axios.post('/reminderData', newReminderObject);
