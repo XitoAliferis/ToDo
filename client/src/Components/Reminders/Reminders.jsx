@@ -87,6 +87,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setIsAdding(true);
     setEditingReminder(null); // Clear the editing state
     setNewReminder({ name: "", date: convertToLocal(new Date()), group: "", allday: false, daily: false });
+    setDaily(false); // Reset daily state to false
   };
 
   const handleNewReminderChange = (e) => {
@@ -94,7 +95,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setNewReminder(prevState => ({
       ...prevState,
       [name]: value,
-      group: prevState.group || ((currentItem.href !== "/" && currentItem.href !== "/Upcoming") ? currentItem.label : "")
+      group: prevState.group || ((currentItem.href !== "/" && currentItem.href !== "/Upcoming" && currentItem.href !== "/Daily") ? currentItem.label : "")
     }));
   };
   
@@ -234,6 +235,8 @@ useEffect(() => {
       ? filterAndSortItems(item => item.date.toString().startsWith(today) || item.daily)
       : currentItem.href === "/Upcoming"
           ? filterAndSortItems(() => true)
+      : currentItem.href === "/Daily"
+          ? filterAndSortItems(item => item.daily)
           : filterAndSortItems(item => item.group === currentItem.label);
   
   const uniqueDates = [...new Set(filteredReminderItems.map(item => item.date.slice(0, 10)))].sort();

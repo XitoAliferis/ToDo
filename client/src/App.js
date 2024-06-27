@@ -97,7 +97,6 @@ function App() {
   const handleAddReminder = async (name, date, group, allday, daily) => {
     const tempId = uuidv4();
     const userId = auth.currentUser?.uid;
-    if (daily) group = "Daily";
     const reminderObject = { id: tempId, name, done: false, date, group, allday, daily, userId };
     setIsUpdating(true);
   
