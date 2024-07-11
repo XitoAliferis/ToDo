@@ -53,7 +53,7 @@ const NewReminderPopup = ({
           />
         </p>
         <p className="text-white font-thin flex ">
-          Daily:
+          Repeat:
           <div
             className="relative left-2 top-[3.2px] h-[20px] w-[20px] rounded-1"
             style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: daily ? 'white' : 'transparent' }}
@@ -68,21 +68,21 @@ const NewReminderPopup = ({
         </p>
 
         <p className="text-white font-thin flex">Group:
-          {(currentItem.href === "/" || currentItem.href === "/Upcoming" || currentItem.href === "/Daily") && (
+          {(currentItem.href === "/" || currentItem.href === "/Upcoming") && (
             <NavDropdown
               className="pl-1"
               id="nav-dropdown-dark-example"
               title={newReminder.group || 'Select Group'}
               menuVariant="dark"
             >
-              {navItems.filter(x => x.label !== "Today" && x.label !== "Upcoming"&& x.label !== "Daily").map((x, index) => (
+              {navItems.filter(x => x.label !== "Today" && x.label !== "Upcoming").map((x, index) => (
                 <NavDropdown.Item key={index} style={{ color: x.bgColor }} onClick={() => setNewReminder(prevState => ({ ...prevState, group: x.label }))}>
                   {x.label}
                 </NavDropdown.Item>
               ))}
             </NavDropdown>
           )}
-          {currentItem.href !== "/" && currentItem.href !== "/Upcoming" && currentItem.href !== "/Daily" && (
+          {currentItem.href !== "/" && currentItem.href !== "/Upcoming" && (
             ` ${currentItem.label}`
           )}
         </p>

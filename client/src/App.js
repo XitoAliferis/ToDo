@@ -112,7 +112,6 @@ function App() {
   const navItems = [
     { href: "/", label: "Today", bgColor: "#EE6B6E" },
     { href: "/Upcoming", label: "Upcoming", bgColor: "#FFFFFF" },
-    { href: "/Daily", label: "Daily", bgColor: "#F2F4AF" },
     ...reminders.map(cls => ({
       id: cls.id,
       href: `/${cls.id}`,

@@ -70,18 +70,6 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setIsUpdating(false); // Clear updating state
   };
 
-  const isTimeBeforeNow = (date) => {
-    const now = new Date();
-    const inputDate = new Date(date);
-
-    // Check if the input date is today
-    const isSameDay = now.toDateString() <= inputDate.toDateString();
-
-    // Check if the input time is before the current time
-    const isBeforeNow = inputDate < now;
-
-    return isSameDay && isBeforeNow;
-  };
 
   const handleNewReminder = () => {
     setIsAdding(true);
@@ -95,7 +83,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setNewReminder(prevState => ({
       ...prevState,
       [name]: value,
-      group: prevState.group || ((currentItem.href !== "/" && currentItem.href !== "/Upcoming" && currentItem.href !== "/Daily") ? currentItem.label : "")
+      group: prevState.group || ((currentItem.href !== "/" && currentItem.href !== "/Upcoming") ? currentItem.label : "")
     }));
   };
   
@@ -235,8 +223,6 @@ useEffect(() => {
       ? filterAndSortItems(item => item.date.toString().startsWith(today) || item.daily)
       : currentItem.href === "/Upcoming"
           ? filterAndSortItems(() => true)
-      : currentItem.href === "/Daily"
-          ? filterAndSortItems(item => item.daily)
           : filterAndSortItems(item => item.group === currentItem.label);
   
   const uniqueDates = [...new Set(filteredReminderItems.map(item => item.date.slice(0, 10)))].sort();

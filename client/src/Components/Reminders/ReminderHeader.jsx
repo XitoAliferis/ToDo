@@ -58,7 +58,7 @@ const ReminderHeader = ({ navItems, colorScheme, isExpanded, handleEditReminder 
                 filter: "drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4))",
             }}
         >
-            {currentPath !== "/" && currentPath !== "/Upcoming" && currentPath !== "/Daily" ? (
+            {currentPath !== "/" && currentPath !== "/Upcoming" ? (
                 <EditableLabel currentItem={currentItem} />
             ) : (
                 <div>{currentItem.label}</div>

@@ -4,9 +4,12 @@ import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from '../firebase.js';
 import useSwipe from './Reminders/Swipe.js';
+import NewSideBarReminderPopup from "./NewSideBarItemPopup.jsx";
+import NewSideBarMenu from "./NewSideBarMenu.jsx";
 
 const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, setIsExpanded, setIsUpdating }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [textOpacity, setTextOpacity] = useState(1);
   const navigate = useNavigate();
   const [newReminder, setNewReminder] = useState("");
@@ -56,14 +59,13 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
     }
   }, [isExpanded]);
 
-
   const handleToggle = () => {
     setShiftedReminder(null);
     setIsExpanded(!isExpanded);
   };
 
   const handleNewReminder = () => {
-    setIsAdding(true);
+    setIsMenuOpen(true);
   };
 
   const handleNewReminderChange = (e) => {
@@ -134,16 +136,23 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
     } finally {
         setIsUpdating(false); // Clear updating state
     }
-};
-
+  };
 
   const getOpacity = (index) => {
     const itemOffset = index * 50;
     const opacity = Math.max(1 - scrollY / (itemOffset + 40), 0);
     return opacity;
   };
-  
 
+  const handleAddGroup = () => {
+    setIsAdding(true);
+    setIsMenuOpen(false);
+  };
+  
+  const handleAddFolder = () =>{
+
+    setIsMenuOpen(false);
+  }
   return (
     <div
       className={`absolute top-0 left-0 h-[100dvh] transition-all duration-300 ${isExpanded ? 'w-[15rem]' : ' w-[4rem]'}`}
@@ -169,7 +178,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
       <div className={`pt-[6.5rem] max-sm:pt-[4.2rem] overflow-y-auto overflow-x-hidden max-h-full flex flex-col space-y-[15px] ${isExpanded ? 'pl-[0%]' : 'pl-[0rem]'} scrollbar-hide sidebar-content`}>
         {navItems.map((item, index) => (
           <React.Fragment key={index}>
-            {index === 3 && (
+            {index === 2 && (
               <hr
                 className={`opacity-70 h-[1.4px] relative left-[calc((2.3rem-27.8px))] ${isExpanded ? 'w-[13.9rem]' : 'w-[2.8rem]'} transition-all duration-300`}
                 style={{
@@ -235,37 +244,19 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
             </div>
           </React.Fragment>
         ))}
+        {isMenuOpen && (
+          <NewSideBarMenu onAddGroup={handleAddGroup} onAddFolder={handleAddFolder} colorScheme={colorScheme} />
+        )}
         {isAdding && (
-          <div
-          className={`relative h-[40px] rounded-[10px] flex items-center cursor-pointer transition-all duration-300 left-[0.7rem] ${isExpanded ? 'w-[13.5rem]' : 'w-[2.6rem]'}`}
-          style={{
-              backgroundColor: colorScheme.SideBar.reminder,
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#101010"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colorScheme.SideBar.reminder}
-          >
-            <div className="relative w-[27.5px] h-[27.5px] left-[calc((2.6rem-27.5px)/2)] overflow-hidden rounded-full transition-all duration-300">
-              <input
-                type="color"
-                value={newColor}
-                onChange={handleColorChange}
-                className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] border-none cursor-pointer"
-                style={{ backgroundColor: "transparent" }}
-              />
-            </div>
-            {isExpanded && (
-              <input
-                className="font-thin text-[14px] truncate max-w-[150px] left-[0.8rem] relative bg-transparent border-none focus:outline-none transition-all duration-300"
-                style={{ color: colorScheme.SideBar.text }}
-                type="text"
-                value={newReminder}
-                onChange={handleNewReminderChange}
-                onKeyDown={handleNewReminderKeyPress}
-                placeholder="Enter new reminder"
-                autoFocus
-              />
-            )}
-          </div>
+          <NewSideBarReminderPopup
+            isExpanded={isExpanded}
+            colorScheme={colorScheme}
+            newColor={newColor}
+            handleColorChange={handleColorChange}
+            newReminder={newReminder}
+            handleNewReminderChange={handleNewReminderChange}
+            handleNewReminderKeyPress={handleNewReminderKeyPress}
+          />
         )}
       </div>
     </div>
