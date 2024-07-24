@@ -3,6 +3,9 @@
 
 This is a personal project that I felt was something I could create fully tailored to myself as a student. Being in university, there are lots of assignments, tests, and other important responsibilities that I need to meet. When using other reminder apps, I felt they couldn't meet up to what I needed, because of this I created ToDo; a reminder app for everyone.
 
+## Deployment
+Click [here](https://to-do-ashen-xi.vercel.app/) to use the deployed version of my To-Do web-app! 
+
 ## Web App
 
 The web app of this project was created using React and Tailwind for the front-end, Node.Js for the backend, and Vercel's Postgres SQL Database.
