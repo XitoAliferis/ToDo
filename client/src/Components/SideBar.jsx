@@ -7,7 +7,7 @@ import useSwipe from './Reminders/Swipe.js';
 import NewSideBarReminderPopup from "./NewSideBarItemPopup.jsx";
 import NewSideBarMenu from "./NewSideBarMenu.jsx";
 
-require('dotenv').config();
+
 
 const API_URL = process.env.REACT_APP_API_URL;
 

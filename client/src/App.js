@@ -7,7 +7,7 @@ import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
 import { auth, onAuthStateChanged, getRedirectResult } from './firebase.js';
-require('dotenv').config();
+
 
 const API_URL = process.env.REACT_APP_API_URL;
 

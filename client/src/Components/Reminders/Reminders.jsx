@@ -7,7 +7,6 @@ import ReminderHeader from "./ReminderHeader";
 import NewReminderPopup from "./NewReminderPopup";
 import ReminderList from "./ReminderList";
 import { convertToLocal } from "./ReminderUtils";
-require('dotenv').config();
 
 const API_URL = process.env.REACT_APP_API_URL;
 
