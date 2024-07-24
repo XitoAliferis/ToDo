@@ -5,6 +5,7 @@ This is a personal project that I felt was something I could create fully tailor
 
 ## Deployment
 Click [here](https://to-do-ashen-xi.vercel.app/) to use the deployed version of my To-Do web-app! 
+
 ## Web App
 
 The web app of this project was created using React and Tailwind for the front-end, Node.Js for the backend, and Vercel's Postgres SQL Database.
