@@ -7,6 +7,9 @@ import ReminderHeader from "./ReminderHeader";
 import NewReminderPopup from "./NewReminderPopup";
 import ReminderList from "./ReminderList";
 import { convertToLocal } from "./ReminderUtils";
+require('dotenv').config();
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setReminderItems, handleCheckItem, handleAddReminder, isUpdating, setIsUpdating, handleEditReminder }) => {
   const [isAdding, setIsAdding] = useState(false);
@@ -42,7 +45,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     setIsUpdating(true); // Set updating state
     try {
       setReminderItems(reminderItems.filter(reminder => reminder.id !== id));
-      const response = await axios.delete(`/reminderItemData/${id}`);
+      const response = await axios.delete(`${API_URL}/reminderItemData/${id}`);
       if (response.status === 200 && response.data.success) {
 
         setShiftedReminderItem(!shiftedReminderItem);
@@ -62,7 +65,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const handleEditReminderItem = async (reminder) => {
     setIsUpdating(true); // Set updating state
     try {
-      await axios.post(`/editReminderItemData`, reminder);
+      await axios.post(`${API_URL}/editReminderItemData`, reminder);
       setReminderItems(reminderItems.map(x => (x.id === reminder.id) ? reminder : x));
     } catch (error) {
       console.error('Error editing reminder:', error);

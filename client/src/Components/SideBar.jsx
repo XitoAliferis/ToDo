@@ -7,6 +7,10 @@ import useSwipe from './Reminders/Swipe.js';
 import NewSideBarReminderPopup from "./NewSideBarItemPopup.jsx";
 import NewSideBarMenu from "./NewSideBarMenu.jsx";
 
+require('dotenv').config();
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, setIsExpanded, setIsUpdating }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,7 +80,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
     if (e.key === "Enter" && newReminder.trim()) {
       const newReminderObject = {id: uuidv4(), name: newReminder, component: "/", color: newColor, userId: auth.currentUser?.uid };
       try {
-        const response = await axios.post('/reminderData', newReminderObject);
+        const response = await axios.post(`${API_URL}/reminderData`, newReminderObject);
         setReminders([
           ...reminders,
           response.data
@@ -124,7 +128,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
     setIsUpdating(true); // Set updating state
     try {
       setReminders(reminders.filter(reminder => reminder.id !== id));
-        const response = await axios.delete(`/reminderData/${id}`);
+        const response = await axios.delete(`${API_URL}/reminderData/${id}`);
         if (response.status === 200 && response.data.success) {
             
           setShiftedReminder(!shiftedReminder)

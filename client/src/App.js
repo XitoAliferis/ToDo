@@ -7,6 +7,9 @@ import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
 import { auth, onAuthStateChanged, getRedirectResult } from './firebase.js';
+require('dotenv').config();
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const colorScheme = [
   {
@@ -54,8 +57,8 @@ function App() {
           const userId = user.uid;
           console.log('Fetching data for userId:', userId);
           const [reminderResponse, reminderItemResponse] = await Promise.all([
-            axios.get('/reminderData', { params: { userId } }),
-            axios.get('/reminderItemData', { params: { userId } })
+            axios.get('${API_URL}/reminderData', { params: { userId } }),
+            axios.get('${API_URL}/reminderItemData', { params: { userId } })
           ]);
           console.log('Reminder data:', reminderResponse.data);
           console.log('Reminder item data:', reminderItemResponse.data);
@@ -86,8 +89,8 @@ function App() {
     setIsUpdating(true);
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
-      if (item.daily) await axios.post('/editReminderItemData', { ...item, date: item.date })
-      await axios.post('/checkReminderItem', { id: item.id });
+      if (item.daily) await axios.post('${API_URL}/editReminderItemData', { ...item, date: item.date })
+      await axios.post('${API_URL}/checkReminderItem', { id: item.id });
     } catch (error) {
       console.error('Error:', error);
     }
@@ -101,7 +104,7 @@ function App() {
     setIsUpdating(true);
   
     try {
-      const response = await axios.post('/reminderItemData', reminderObject);
+      const response = await axios.post('${API_URL}/reminderItemData', reminderObject);
       setReminderItems([...reminderItems, response.data]);
     } catch (error) {
       console.error('Error:', error);
@@ -151,7 +154,7 @@ function App() {
             item.id === updatedReminder.id ? updatedReminder : item
         )
     );
-        const response = await axios.post(`/editReminderData`, updatedReminder);
+        const response = await axios.post(`${API_URL}/editReminderData`, updatedReminder);
         if (response.data.success) {
             
         } else {
