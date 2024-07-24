@@ -1,5 +1,5 @@
 const { sql } = require('@vercel/postgres');
-require('dotenv').config({ path: '.env.development.local' });
+require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
 const moment = require('moment-timezone');
@@ -241,8 +241,9 @@ fastify.post('/checkReminderItem', async (request, reply) => {
 const start = async () => {
     try {
         await createTable();
-       await preloadData();
-        await fastify.listen({ port: 5000, host: '0.0.0.0' });
+        await preloadData();
+        const port = process.env.PORT || 5000;
+        await fastify.listen({ port, host: '0.0.0.0' });
         fastify.log.info(`Server started on port 5000`);
     } catch (err) {
         fastify.log.error(err);
