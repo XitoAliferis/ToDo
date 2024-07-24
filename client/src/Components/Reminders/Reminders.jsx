@@ -186,7 +186,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   };
   
 
-  const mapItemDate = item => item.allday ? { ...item, date: item.date } : { ...item, date: (item.date) };
+  const mapItemDate = item => item.allday ? { ...item, date: item.date } : { ...item, date: convertToLocal(item.date) };
   
   const adjustDailyDate = item => {
     if (item.daily) {
