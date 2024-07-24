@@ -61,6 +61,7 @@ function App() {
             axios.get(`${API_URL}/reminderItemData`, { params: { userId } })
           ]);
           console.log('Reminder data:', reminderResponse.data);
+          console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
           console.log('Reminder item data:', reminderItemResponse.data);
           setReminders(reminderResponse.data);
           setReminderItems(reminderItemResponse.data);
