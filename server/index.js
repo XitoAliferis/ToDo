@@ -1,5 +1,7 @@
 const { sql } = require('@vercel/postgres');
 require('dotenv').config();
+//require('dotenv').config({ path: '.env.development.local' });
+//use above on local
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
 const moment = require('moment-timezone');
@@ -7,14 +9,15 @@ const cors = require('@fastify/cors');
 
 // Register CORS plugin
 fastify.register(cors, {
-    origin: 'https://to-do-ashen-xi.vercel.app', // Update this with your frontend's domain for better security
+    //origin: 'http://localhost:3000', // local
+    origin: 'https://to-do-ashen-xi.vercel.app', // live
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
   
 
 async function createTable() {
-    await sql`
-    DROP TABLE reminder, reminderitem`;
+   // await sql`
+   // DROP TABLE reminder, reminderitem`;
     await sql`
       CREATE TABLE IF NOT EXISTS ReminderItem (
         id VARCHAR(255) PRIMARY KEY,
@@ -42,35 +45,6 @@ async function createTable() {
 
 
 
-async function preloadData() {
-    testUser = "FayuthArx5ZR0riuhG5uzL6ab8x2";
-    const reminderItemData = [
-        { id: uuidv4(), name: "Sarah's Birthday", done: true, date: "2025-01-26T00:00:00.000Z", group: "Sarah's Reminders", allday: true, userId: testUser, created_at: new Date().toISOString() },
-        { id: uuidv4(), name: "Xito's Birthday", done: false, date: "2024-12-14T00:00:00.000Z", group: "Xito's Reminders", allday: true, userId: testUser, created_at: new Date().toISOString() }
-    ];
-
-    const reminderData = [
-        { id: uuidv4(), name: "Sarah's Reminders", color: "#febed4", userId: testUser, created_at: new Date().toISOString() },
-        { id: uuidv4(), name: "Xito's Reminders", color: "#4d79ff", userId: testUser, created_at: new Date(new Date().getTime() + 1000).toISOString() }
-    ];
-    
-
-    for (const x of reminderItemData) {
-        await sql`
-        INSERT INTO ReminderItem (id, name, done, date, "group", allday, userId, created_at)
-        VALUES (${x.id}, ${x.name}, ${x.done}, ${new Date(x.date)}, ${x.group}, ${x.allday}, ${x.userId}, ${x.created_at})
-        ON CONFLICT (id) DO NOTHING;
-        `;
-    }
-
-    for (const x of reminderData) {
-        await sql`
-        INSERT INTO Reminder (id, name, color, userId, created_at)
-        VALUES (${x.id}, ${x.name}, ${x.color}, ${x.userId}, ${x.created_at})
-        ON CONFLICT (id) DO NOTHING;
-        `;
-    }
-}
 
 
 async function setReminderItemData(x) {
@@ -247,7 +221,6 @@ fastify.post('/checkReminderItem', async (request, reply) => {
 const start = async () => {
     try {
         await createTable();
-        await preloadData();
         const port = process.env.PORT || 5000;
         await fastify.listen({ port, host: '0.0.0.0' });
         fastify.log.info(`Server started on port 5000`);
