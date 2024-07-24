@@ -57,8 +57,8 @@ function App() {
           const userId = user.uid;
           console.log('Fetching data for userId:', userId);
           const [reminderResponse, reminderItemResponse] = await Promise.all([
-            axios.get('${API_URL}/reminderData', { params: { userId } }),
-            axios.get('${API_URL}/reminderItemData', { params: { userId } })
+            axios.get(`${API_URL}/reminderData`, { params: { userId } }),
+            axios.get(`${API_URL}/reminderItemData`, { params: { userId } })
           ]);
           console.log('Reminder data:', reminderResponse.data);
           console.log('Reminder item data:', reminderItemResponse.data);
@@ -89,8 +89,8 @@ function App() {
     setIsUpdating(true);
     try {
       setReminderItems(reminderItems.map(rem => rem.id === item.id ? { ...rem, done: !rem.done } : rem));
-      if (item.daily) await axios.post('${API_URL}/editReminderItemData', { ...item, date: item.date })
-      await axios.post('${API_URL}/checkReminderItem', { id: item.id });
+      if (item.daily) await axios.post(`${API_URL}/editReminderItemData`, { ...item, date: item.date })
+      await axios.post(`${API_URL}/checkReminderItem`, { id: item.id });
     } catch (error) {
       console.error('Error:', error);
     }
@@ -104,7 +104,7 @@ function App() {
     setIsUpdating(true);
   
     try {
-      const response = await axios.post('${API_URL}/reminderItemData', reminderObject);
+      const response = await axios.post(`${API_URL}/reminderItemData`, reminderObject);
       setReminderItems([...reminderItems, response.data]);
     } catch (error) {
       console.error('Error:', error);
