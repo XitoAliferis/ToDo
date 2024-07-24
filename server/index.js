@@ -3,13 +3,14 @@ require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
 const moment = require('moment-timezone');
-const fastifyCors = require('fastify-cors');
+const cors = require('@fastify/cors');
 
 // Register CORS plugin
-fastify.register(fastifyCors, {
-    origin: 'https://to-do-ashen-xi.vercel.app/', // Update this with your frontend's domain for better security
+fastify.register(cors, {
+    origin: 'https://to-do-ashen-xi.vercel.app', // Update this with your frontend's domain for better security
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
+  
 
 async function createTable() {
     await sql`
