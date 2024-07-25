@@ -6,8 +6,7 @@ import Reminders from './Components/Reminders/Reminders';
 import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
-import { auth, onAuthStateChanged, getRedirectResult } from './firebase.js';
-
+import { auth,  provider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult } from './firebase.js';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -29,6 +28,23 @@ function App() {
   const [reminderItems, setReminderItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleProfileClick = async () => {
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+        console.log('User signed out.');
+        window.location.reload();
+      } else {
+        provider.setCustomParameters({ prompt: 'select_account' });
+        await signInWithPopup(auth, provider);
+        console.log('Redirecting for sign-in...');
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error during sign-in or sign-out: ', error);
+    }
+  };
 
   const fetchData = useCallback(() => {
     setIsLoading(true);
@@ -191,11 +207,19 @@ function App() {
 )}
 {auth.currentUser?.uid === undefined && (
   <div 
-    className='flex items-center justify-center  h-screen w-screen'
-    style={{ backgroundColor: colorScheme[0].Reminders.background, color: colorScheme[0].Reminders.text}}
+  className='flex flex-col items-center justify-center h-screen w-screen'
+  style={{ backgroundColor: colorScheme[0].Reminders.background, color: colorScheme[0].Reminders.text}}
+>
+  <p>You are Logged Out</p>
+  <button className='rounded-md w-[9vw]' onClick={handleProfileClick} 
+  
+  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.35)'}
+  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
   >
-    You are Logged Out
-  </div>
+    Sign In
+  </button>
+</div>
+
 )}
 
       <SideBar
