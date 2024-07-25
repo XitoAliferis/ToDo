@@ -211,7 +211,7 @@ function App() {
   style={{ backgroundColor: colorScheme[0].Reminders.background, color: colorScheme[0].Reminders.text}}
 >
   <p>You are Logged Out</p>
-  <button className='rounded-md w-[9vw]' onClick={handleProfileClick} 
+  <button className='rounded-md w-[140px]' onClick={handleProfileClick} 
   
   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.35)'}
   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
