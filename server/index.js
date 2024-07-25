@@ -1,6 +1,6 @@
 const { sql } = require('@vercel/postgres');
-require('dotenv').config();
-//require('dotenv').config({ path: '.env.development.local' });
+//require('dotenv').config();
+require('dotenv').config({ path: '.env.development.local' });
 //use above on local
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
@@ -9,8 +9,8 @@ const cors = require('@fastify/cors');
 
 // Register CORS plugin
 fastify.register(cors, {
-    //origin: 'http://localhost:3000', // local
-    origin: 'https://to-do-ashen-xi.vercel.app', // live
+    origin: 'http://localhost:3000', // local
+    //origin: 'https://to-do-ashen-xi.vercel.app', // live
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
   
@@ -76,9 +76,30 @@ async function setReminderData(x) {
     `;
 }
 
-
 async function getReminderItemData(userId) {
-    return await sql`SELECT * FROM ReminderItem WHERE userId = ${userId} ORDER BY date;`;
+    const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+    if (systemTimeZone === 'America/Toronto') {
+      // System is already in EST/EDT
+      return await sql`SELECT * FROM ReminderItem WHERE userId = ${userId} ORDER BY date;`;
+    } else {
+      // System is in UTC
+      return await sql`
+          SELECT 
+              id, 
+              name, 
+              done, 
+              date AT TIME ZONE 'America/Toronto' AT TIME ZONE 'UTC' AS date,
+              "group", 
+              allday, 
+              daily, 
+              userId, 
+              created_at 
+          FROM ReminderItem 
+          WHERE userId = ${userId} 
+          ORDER BY date;
+      `;
+    }
   }
   
   async function getReminderData(userId) {
