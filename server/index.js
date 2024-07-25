@@ -1,6 +1,6 @@
 const { sql } = require('@vercel/postgres');
-//require('dotenv').config();
-require('dotenv').config({ path: '.env.development.local' });
+require('dotenv').config();
+//require('dotenv').config({ path: '.env.development.local' });
 //use above on local
 const fastify = require('fastify')({ logger: true });
 const { v4: uuidv4 } = require('uuid'); // Import UUID library
@@ -9,8 +9,8 @@ const cors = require('@fastify/cors');
 
 // Register CORS plugin
 fastify.register(cors, {
-    origin: 'http://localhost:3000', // local
-    //origin: 'https://to-do-ashen-xi.vercel.app', // live
+    //origin: 'http://localhost:3000', // local
+    origin: 'https://to-do-ashen-xi.vercel.app', // live
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
   
