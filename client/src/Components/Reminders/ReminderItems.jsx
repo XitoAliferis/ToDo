@@ -114,7 +114,7 @@ const ReminderItems = ({
             style={{
               top: item.allday ? '-4px' : '6.1px',
               right: item.allday ? '67.3px' : convertToStandardTime(item.date).length > 7 ? '0px' : '7.5px',
-              backgroundColor: (currentPath !== "/" && currentPath !== "/Upcoming") ? navItems.bgColor : navItems.find(x => x.label === item.group)?.bgColor,
+              backgroundColor: (currentPath !== "/" && currentPath !== "/Upcoming") ? navItems.bgColor : navItems.find(x => x.id === item.group)?.bgColor,
               transition: 'top 0.3s, right 0.3s, background-color 0.3s'
             }}>
                      <div

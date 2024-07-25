@@ -225,7 +225,7 @@ useEffect(() => {
       ? filterAndSortItems(item => item.date.toString().startsWith(today) || item.daily)
       : currentItem.href === "/Upcoming"
           ? filterAndSortItems(() => true)
-          : filterAndSortItems(item => item.group === currentItem.label);
+          : filterAndSortItems(item => item.group === currentItem.id);
   
   const uniqueDates = [...new Set(filteredReminderItems.map(item => item.date.slice(0, 10)))].sort();
   

@@ -17,6 +17,12 @@ const NewReminderPopup = ({
 }) => {
   if (!isAdding) return null;
 
+
+  const getGroupNameById = (id) => {
+    const group = navItems.find(item => item.id === id);
+    return group ? group.label : 'Select Group';
+  };
+  
   return (
     <div ref={popupRef} className="absolute h-[355px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "#404040", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
       <div className="relative top-[9%] left-[5%] space-y-[20px]">
@@ -72,11 +78,11 @@ const NewReminderPopup = ({
             <NavDropdown
               className="pl-1"
               id="nav-dropdown-dark-example"
-              title={newReminder.group || 'Select Group'}
+              title={getGroupNameById(newReminder.group)}
               menuVariant="dark"
             >
               {navItems.filter(x => x.label !== "Today" && x.label !== "Upcoming").map((x, index) => (
-                <NavDropdown.Item key={index} style={{ color: x.bgColor }} onClick={() => setNewReminder(prevState => ({ ...prevState, group: x.label }))}>
+                <NavDropdown.Item key={index} style={{ color: x.bgColor }} onClick={() => setNewReminder(prevState => ({ ...prevState, group: x.id }))}>
                   {x.label}
                 </NavDropdown.Item>
               ))}
@@ -94,9 +100,9 @@ const NewReminderPopup = ({
             title="Select Type"
             menuVariant="dark"
           >
-            <NavDropdown.Item href="#action/3.1">Essay</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.2">Homework</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.3">Exam</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.1">TBD</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.2">TBD</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.3">TBD</NavDropdown.Item>
           </NavDropdown>
         </p>
       </div>
