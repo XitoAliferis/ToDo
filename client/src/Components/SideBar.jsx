@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +20,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
   const [newColor, setNewColor] = useState("#acbda1");
   const [scrollY, setScrollY] = useState(0);
   const [shiftedReminder, setShiftedReminder] = useState(null);
+  const popupRef = useRef(null);
 
   const location = useLocation();
   const currentPath = location.pathname;
@@ -52,6 +53,21 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
       document.removeEventListener('click', handleClickOutside);
     };
   }, [shiftedReminder]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      setIsMenuOpen(false);
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
 
   useEffect(() => {
     if (isExpanded) {
@@ -249,7 +265,7 @@ const SideBar = ({ reminders, setReminders, navItems, colorScheme, isExpanded, s
           </React.Fragment>
         ))}
         {isMenuOpen && (
-          <NewSideBarMenu onAddGroup={handleAddGroup} onAddFolder={handleAddFolder} colorScheme={colorScheme} />
+          <NewSideBarMenu ref={popupRef} onAddGroup={handleAddGroup} onAddFolder={handleAddFolder} colorScheme={colorScheme} />
         )}
         {isAdding && (
           <NewSideBarReminderPopup

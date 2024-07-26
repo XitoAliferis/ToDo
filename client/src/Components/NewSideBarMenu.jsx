@@ -2,7 +2,7 @@ import React from "react";
 
 const NewSideBarMenu = ({ onAddGroup, onAddFolder, colorScheme }) => {
   return (
-    <div className="menu-container space-y-[1%] w-[90%] h-[5.5rem] left-[4.5%] top-[11%] rounded-3 absolute"
+    <div className="menu-container drop-shadow-lg space-y-[1%] w-[90%] h-[5.5rem] left-[4.5%] top-[11%] rounded-3 absolute"
     style={{
       backgroundColor: colorScheme?.SideBar?.reminder,
     }}>

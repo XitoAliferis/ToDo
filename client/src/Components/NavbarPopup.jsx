@@ -6,7 +6,7 @@ const NavbarPopup = ({
 }) => {
 
     return (
-        <div className="menu-container space-y-[1%] w-[140px] h-[5.5rem] justify-center right-[1.3%] top-[110%] rounded-3 absolute "
+        <div className="menu-container space-y-[1%] w-[140px] h-[5.5rem] drop-shadow-md justify-center right-[1.3%] top-[110%] rounded-3 absolute "
             style={{ background: colorScheme.NavBar.background }}
         >
             <div className="flex space-x-1 pl-[17.5%] top-[14%] h-[2rem] w-[100%] items-center relative "
