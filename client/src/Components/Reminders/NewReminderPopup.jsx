@@ -22,7 +22,7 @@ const NewReminderPopup = ({
     const group = navItems.find(item => item.id === id);
     return group ? group.label : 'Select Group';
   };
-  
+
   return (
     <div ref={popupRef} className="absolute h-[355px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "#404040", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
       <div className="relative top-[9%] left-[5%] space-y-[20px]">
@@ -74,7 +74,7 @@ const NewReminderPopup = ({
         </p>
 
         <p className="text-white font-thin flex">Group:
-          {(currentItem.href === "/" || currentItem.href === "/Upcoming") && (
+          {(currentItem.href === "/" || currentItem.href === "/Upcoming") ? (
             <NavDropdown
               className="pl-1"
               id="nav-dropdown-dark-example"
@@ -87,11 +87,16 @@ const NewReminderPopup = ({
                 </NavDropdown.Item>
               ))}
             </NavDropdown>
-          )}
-          {currentItem.href !== "/" && currentItem.href !== "/Upcoming" && (
-            ` ${currentItem.label}`
+          ) : (
+            (() => {
+              if (newReminder.group !== currentItem.id) {
+                setNewReminder(prevState => ({ ...prevState, group: currentItem.id }));
+              }
+              return ` ${currentItem.label}`;
+            })()
           )}
         </p>
+
         <p className="text-white font-thin flex">Notify: TBD</p>
         <p className="text-white font-thin flex">Type:
           <NavDropdown
