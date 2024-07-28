@@ -4,9 +4,11 @@ import logoWhite from "../Images/logo-transparent-white.png";
 import logoBlack from "../Images/logo-transparent-black.png";
 import { auth, provider, signInWithPopup, signInWithRedirect, signOut } from '../firebase';
 import NavbarPopup from "./NavbarPopup";
-const NavBar = ({ colorScheme}) => {
+import ThemePopup from "./ThemePopup";
+const NavBar = ({ colorScheme,currentColorSchemeIndex, setCurrentColorSchemeIndex}) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loggedInClick, setLoggedInClick] = useState(false);
+  const [themeMenu, setThemeMenu] = useState(false);
   const profileRef = useRef(null);
   const popupRef = useRef(null);
   useEffect(() => {
@@ -57,6 +59,10 @@ const NavBar = ({ colorScheme}) => {
   };
   const logo = colorScheme.NavBar.background === "#4F4F4F" ? logoBlack : logoWhite;
 
+  const openThemeMenu = () =>{
+    setThemeMenu(true);
+    setLoggedInClick(false);
+  }
   return (
     <div className="font-thin drop-shadow absolute top-0 left-0 h-[3.4rem] w-[100vw] flex items-center justify-between" style={{ backgroundColor: colorScheme.NavBar.background }}>
       <a className="no-underline" href="/">
@@ -86,8 +92,16 @@ const NavBar = ({ colorScheme}) => {
             <NavbarPopup
               colorScheme={colorScheme}
               handleSignOut={handleSignOut}
+              openThemeMenu={openThemeMenu}
             />
           </div>
+        )}
+        {themeMenu && (
+          <ThemePopup
+          colorScheme={colorScheme}
+          setThemeMenu={setThemeMenu}
+          currentColorSchemeIndex={currentColorSchemeIndex}
+          setCurrentColorSchemeIndex={setCurrentColorSchemeIndex}/>
         )}
       </div>
     </div>

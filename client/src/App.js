@@ -6,7 +6,7 @@ import Reminders from './Components/Reminders/Reminders';
 import NavBar from './Components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { v4 as uuidv4 } from 'uuid';
-import { auth,  provider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged, getRedirectResult } from './firebase.js';
+import { auth, provider, signInWithPopup, signOut, onAuthStateChanged, getRedirectResult } from './firebase.js';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -28,6 +28,15 @@ function App() {
   const [reminderItems, setReminderItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [currentColorSchemeIndex, setCurrentColorSchemeIndex] = useState(() => {
+    const storedIndex = localStorage.getItem('colorSchemeIndex');
+    return storedIndex !== null ? parseInt(storedIndex, 10) : 0;
+  });
+
+  const saveColorSchemeIndex = (index) => {
+    setCurrentColorSchemeIndex(index);
+    localStorage.setItem('colorSchemeIndex', index);
+  };
 
   const handleProfileClick = async () => {
     try {
@@ -93,11 +102,10 @@ function App() {
     });
   }, []);
 
-
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
   useEffect(() => {
     localStorage.setItem('reminderItems', JSON.stringify(reminderItems));
   }, [reminderItems]);
@@ -119,7 +127,7 @@ function App() {
     const userId = auth.currentUser?.uid;
     const reminderObject = { id: tempId, name, done: false, date, group, allday, daily, userId };
     setIsUpdating(true);
-  
+
     try {
       const response = await axios.post(`${API_URL}/reminderItemData`, reminderObject);
       setReminderItems([...reminderItems, response.data]);
@@ -180,10 +188,7 @@ function App() {
     } catch (error) {
         console.error('Error editing reminder:', error);
     }
-};
-
-  
-
+  };
 
   if (isLoading) {
     return <div className='overflow-x-hidden overflow-y-hidden h-[100vh] w-[100vh' style={{ backgroundColor: '#626262' }}></div>;
@@ -193,7 +198,7 @@ function App() {
     <Router>
     {auth.currentUser?.uid !== undefined && (
   <Reminders
-    colorScheme={colorScheme[0]}
+    colorScheme={colorScheme[currentColorSchemeIndex]}
     navItems={navItems}
     isExpanded={isExpanded}
     reminderItems={reminderItems}
@@ -208,7 +213,7 @@ function App() {
 {auth.currentUser?.uid === undefined && (
   <div 
   className='flex flex-col items-center justify-center h-screen w-screen'
-  style={{ backgroundColor: colorScheme[0].Reminders.background, color: colorScheme[0].Reminders.text}}
+  style={{ backgroundColor: colorScheme[currentColorSchemeIndex].Reminders.background, color: colorScheme[currentColorSchemeIndex].Reminders.text}}
 >
   <p>You are Logged Out</p>
   <button className='rounded-md w-[140px]' onClick={handleProfileClick} 
@@ -223,7 +228,7 @@ function App() {
 )}
 
       <SideBar
-        colorScheme={colorScheme[0]}
+        colorScheme={colorScheme[currentColorSchemeIndex]}
         reminders={reminders}
         setReminders={setReminders}
         navItems={navItems}
@@ -231,7 +236,11 @@ function App() {
         setIsExpanded={setIsExpanded}
         setIsUpdating={setIsUpdating}
       />
-      <NavBar colorScheme={colorScheme[0]} />
+      <NavBar 
+        colorScheme={colorScheme[currentColorSchemeIndex]} 
+        setCurrentColorSchemeIndex={saveColorSchemeIndex} 
+        currentColorSchemeIndex={currentColorSchemeIndex} 
+      />
     </Router>
   );
 }
