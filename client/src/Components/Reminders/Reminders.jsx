@@ -97,6 +97,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     });
     setAllday(item.allday);
     setIsAdding(true);
+    setDaily(item.daily);
     setEditingReminder(item);
   };
 
