@@ -1,5 +1,5 @@
 import React from 'react';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import Select, {components} from 'react-select';
 
 const NewReminderPopup = ({
   isAdding,
@@ -13,106 +13,187 @@ const NewReminderPopup = ({
   currentItem,
   handleNewReminderChange,
   handleNewReminderKeyPress,
-  popupRef
+  popupRef,
+  handleNewReminderSaveButton,
+  handleNewReminderCancelButton,
+  addReminderError
 }) => {
   if (!isAdding) return null;
-
 
   const getGroupNameById = (id) => {
     const group = navItems.find(item => item.id === id);
     return group ? group.label : 'Select Group';
   };
 
+  const groupOptions = navItems
+    .filter(x => x.label !== "Today" && x.label !== "Upcoming")
+    .map(x => ({ value: x.id, label: x.label, color: x.bgColor }));
+
+  const handleGroupChange = (selectedOption) => {
+    setNewReminder(prevState => ({ ...prevState, group: selectedOption.value }));
+  };
+
   return (
-    <div ref={popupRef} className="absolute h-[355px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "#404040", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
-      <div className="relative top-[9%] left-[5%] space-y-[20px]">
-        <p className="text-white font-thin flex">Task:
+    <div ref={popupRef} className="absolute h-[335px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "rgba(36,36,36,1)", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
+      <div className="relative top-[4%] left-[10.5%]">
+        <p className='text-white text-[17px] font-semibold mb-[7px]'>Add New Reminder</p>
+
+        <div className="mb-[12px]">
+          <p className="text-[13px] font-semibold mb-[4px]"
+            style={{ color: (addReminderError) ? '#c73232' : 'white' }}>{addReminderError ? 'Name*' : 'Name'}</p>
           <input
-            className="w-full bg-transparent pl-1 border-none focus:outline-none text-white"
+            className="w-[78%] pl-[7px] bg-transparent text-[14px]  focus:outline-none text-white rounded-[3px]"
             type="text"
             name="name"
+            style={{
+              border: "1px solid rgba(255, 255, 255, 0.75)",
+              borderRadius: "3px",
+            }}
             value={newReminder.name}
             onChange={handleNewReminderChange}
             onKeyDown={handleNewReminderKeyPress}
-            placeholder="Enter Task Name"
+            placeholder="Pickup Groceries"
             autoComplete="off"
             autoFocus
+            onMouseEnter={(e) => e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.5)'}
+            onMouseLeave={(e) => e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.75)'}
           />
-        </p>
-        <p className="text-white font-thin flex">Date:
+        </div>
+
+        <div className="mb-[12px]">
+          <p className="text-white text-[13px] font-semibold mb-[4px]">Date</p>
           <input
-            className="relative left-1 bg-transparent border-none focus:outline-none w-[75%]"
-            style={{ colorScheme: "dark" }}
+            className="w-[78%] pl-[7px] bg-transparent text-[14px] focus:outline-none text-white rounded-[3px]"
+            style={{
+              colorScheme: "dark",
+              border: "1px solid rgba(255, 255, 255, 0.75)",
+              borderRadius: "3px",
+            }}
             type={allday ? "date" : "datetime-local"}
             name="date"
             value={newReminder.date}
             onChange={handleNewReminderChange}
             placeholder="Date and Time"
+            onMouseEnter={(e) => e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.5)'}
+            onMouseLeave={(e) => e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.75)'}
           />
-        </p>
-        <p className="text-white font-thin flex ">
-          All Day:
-          <div
-            className="relative left-2 top-[3.2px] h-[20px] w-[20px] rounded-1"
-            style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: allday ? 'white' : 'transparent' }}
-            onClick={handleAllday}
-          />
-        </p>
-        <p className="text-white font-thin flex ">
-          Repeat:
-          <div
-            className="relative left-2 top-[3.2px] h-[20px] w-[20px] rounded-1"
-            style={{ boxShadow: `inset 0 0 0 1px white`, backgroundColor: daily ? 'white' : 'transparent' }}
-            onClick={() => {
-              setDaily(prevState => {
-                const newDailyState = !prevState;
-                setNewReminder(prev => ({ ...prev, daily: newDailyState }));  // Update newReminder state
-                return newDailyState;
-              });
-            }}
-          />
-        </p>
 
-        <p className="text-white font-thin flex">Group:
-          {(currentItem.href === "/" || currentItem.href === "/Upcoming") ? (
-            <NavDropdown
-              className="pl-1"
-              id="nav-dropdown-dark-example"
-              title={getGroupNameById(newReminder.group)}
-              menuVariant="dark"
-            >
-              {navItems.filter(x => x.label !== "Today" && x.label !== "Upcoming").map((x, index) => (
-                <NavDropdown.Item key={index} style={{ color: x.bgColor }} onClick={() => setNewReminder(prevState => ({ ...prevState, group: x.id }))}>
-                  {x.label}
-                </NavDropdown.Item>
-              ))}
-            </NavDropdown>
-          ) : (
-            (() => {
-              if (newReminder.group !== currentItem.id) {
-                setNewReminder(prevState => ({ ...prevState, group: currentItem.id }));
-              }
-              return ` ${currentItem.label}`;
-            })()
-          )}
-        </p>
+        </div>
 
-        <p className="text-white font-thin flex">Notify: TBD</p>
-        <p className="text-white font-thin flex">Type:
-          <NavDropdown
-            className="pl-1"
-            id="nav-dropdown-dark-example"
-            title="Select Type"
-            menuVariant="dark"
-          >
-            <NavDropdown.Item href="#action/3.1">TBD</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.2">TBD</NavDropdown.Item>
-            <NavDropdown.Item href="#action/3.3">TBD</NavDropdown.Item>
-          </NavDropdown>
-        </p>
+        <div className="mb-[12px] flex ml-[11.5%] space-x-[40px]">
+          <div className="flex flex-col items-center">
+            <p className="text-white text-[13px] font-semibold mb-[4px]">All Day</p>
+            <div
+              className="h-[20px] w-[20px] rounded-full"
+              style={{ boxShadow: `inset 0 0 0 1.2px white`, backgroundColor: allday ? 'white' : 'transparent' }}
+              onClick={handleAllday}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = allday ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = allday ? 'white' : 'transparent'}
+            />
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="text-white text-[13px] font-semibold mb-[4px]">Repeat</p>
+            <div
+              className="h-[20px] w-[20px] rounded-full"
+              style={{ boxShadow: `inset 0 0 0 1.2px white`, backgroundColor: daily ? 'white' : 'transparent' }}
+              onClick={() => {
+                setDaily(prevState => {
+                  const newDailyState = !prevState;
+                  setNewReminder(prev => ({ ...prev, daily: newDailyState }));
+                  return newDailyState;
+                });
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = daily ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = daily ? 'white' : 'transparent'}
+            />
+          </div>
+        </div>
+        <div className="mb-[20px]">
+          <p className="text-white text-[13px] font-semibold mb-[4px]">Group</p>
+            <Select
+              components={{ 
+                 DropdownIndicator: (props) => 
+      (currentItem.href === "/" || currentItem.href === "/Upcoming") 
+        ? <components.DropdownIndicator {...props} /> 
+        : null,
+    IndicatorSeparator: () => null
+              }}
+              
+              className="w-[78%] text-[14px]"
+              value={groupOptions.find(option => option.value === newReminder.group)}
+              onChange={handleGroupChange}
+              options={groupOptions}
+              isDisabled={!(currentItem.href === "/" || currentItem.href === "/Upcoming")} // Conditionally disable the dropdown
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: 'transparent',
+                  borderColor: 'white',
+                  color: 'white',
+                  borderWidth: '1px',
+                  borderRadius: '3px',
+                  height: '25px', // Adjust to match your text boxes
+                  minHeight: '25px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingLeft: '7px', // Ensure padding matches other text boxes
+                  
+                }),
+                valueContainer: (base) => ({
+                  ...base,
+                  padding: '0px', // Remove default padding
+                }),
+                input: (base) => ({
+                  ...base,
+                  margin: '0px', // Remove default margin
+                  padding: '0px', // Remove default padding
+                  lineHeight: '20px', // Match the line height to vertically center text
+                }),
+                dropdownIndicator: (base) => ({
+                  ...base,
+                  padding: '0px', // Ensure no extra padding around the arrow
+                }),
+                indicatorsContainer: (base) => ({
+                  ...base,
+                  alignItems: 'center', // Vertically center the arrow
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: '#404040', // Match the main popup background color
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isFocused ? '#333333' : '#404040', // Darker background on hover
+                  color: 'white',
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: 'white',
+                }),
+              }}
+              placeholder={(currentItem.href === "/" || currentItem.href === "/Upcoming") ? "Select Group" : currentItem.label}
+            />
+          
+        </div>
+
+        <div className="flex space-x-[4%]">
+          <div className='mt-1 w-[37%] rounded-[3px] text-center text-white font-semibold text-[15px]'
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(0, 0, 0, 0.35)`}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0)'}
+            onClick={handleNewReminderCancelButton}>
+            Cancel
+          </div>
+
+          <div className='mt-1 w-[37%] rounded-[3px] text-center  font-semibold text-[15px]'
+            style={{ color: '#404040', backgroundColor: 'white' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `rgba(255,255, 255, 0.6)`}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+            onClick={handleNewReminderSaveButton}>
+            Save
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
 export default React.memo(NewReminderPopup);

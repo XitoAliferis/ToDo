@@ -17,6 +17,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const [daily, setDaily] = useState(false);
   const [editingReminder, setEditingReminder] = useState(null);
   const [shiftedReminderItem, setShiftedReminderItem] = useState(null);
+  const [addReminderError, setAddReminderError] = useState(false);
   const popupRef = useRef(null);
 
   const location = useLocation();
@@ -102,7 +103,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   };
 
   const handleNewReminderKeyPress = async (e) => {
-    if (e.key === "Enter" && newReminder.name.trim()) {
+    if (e.key === "Enter" && newReminder.name.trim() && newReminder.name) {
       setIsUpdating(true); // Set updating state
       if (editingReminder) {
         const updatedReminder = { ...editingReminder, ...newReminder };
@@ -116,11 +117,37 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       setIsUpdating(false); // Clear updating state
     }
     if (e.key === "Escape") {
+      if (!newReminder.name){
+        setAddReminderError(true);
+      }
       setIsAdding(false);
       setEditingReminder(null); // Clear the editing state
     }
   };
 
+  const handleNewReminderCancelButton = async (e) =>{
+    setAddReminderError(false);
+    setIsAdding(false);
+      setEditingReminder(null); // Clear the editing state
+  }
+  const handleNewReminderSaveButton = async (e) =>{
+    if (!newReminder.name){
+      setAddReminderError(true);
+      return;
+    }
+    setAddReminderError(false);
+    setIsUpdating(true); // Set updating state
+      if (editingReminder) {
+        const updatedReminder = { ...editingReminder, ...newReminder };
+        await handleEditReminderItem(updatedReminder);
+      } else {
+        handleAddReminder(newReminder.name, newReminder.date, newReminder.group, newReminder.allday, newReminder.daily);
+      }
+      setNewReminder({ name: "", date: "", group: "", allday: false, daily: false });
+      setIsAdding(false);
+      setEditingReminder(null); // Clear the editing state
+      setIsUpdating(false); // Clear updating state
+  }
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -253,6 +280,9 @@ useEffect(() => {
         handleNewReminderChange={handleNewReminderChange}
         handleNewReminderKeyPress={handleNewReminderKeyPress}
         popupRef={popupRef}
+        handleNewReminderSaveButton={handleNewReminderSaveButton}
+        handleNewReminderCancelButton={handleNewReminderCancelButton}
+        addReminderError={addReminderError}
       />
       {filteredReminderItems.length === 0 && (
         <div>
