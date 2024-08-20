@@ -14,10 +14,12 @@
         background: #626262;
         margin: 0;
         height: 100%;
+        overflow: hidden; /* Prevent scrolling */
       }
       #root {
         background: #626262;
         height: 100%;
+        overflow: hidden; /* Prevent scrolling within the root element */
       }
     </style>
     <script>
@@ -30,6 +32,18 @@
         if (event.scale !== 1) {
           event.preventDefault();
         }
+      }, { passive: false });
+
+      // Prevent scrolling via arrow keys or touch events
+      window.addEventListener('keydown', function(e) {
+        // Space, Page Up/Down, Arrow keys
+        if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
+          e.preventDefault();
+        }
+      }, false);
+
+      window.addEventListener('touchmove', function(e) {
+        e.preventDefault();
       }, { passive: false });
     </script>
   </head>
