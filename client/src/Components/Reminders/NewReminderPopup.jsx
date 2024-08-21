@@ -33,12 +33,8 @@ const NewReminderPopup = ({
     setNewReminder(prevState => ({ ...prevState, group: selectedOption.value }));
   };
 
-  const handleDisable = () => {
-    return !(currentItem.href === "/" || currentItem.href === "/Upcoming");
-  };
-
   useEffect(() => {
-    if (isAdding && handleDisable()) {
+    if (isAdding && !(currentItem.href === "/" || currentItem.href === "/Upcoming")) {
       setNewReminder(prevState => ({ ...prevState, group: currentItem.id }));
     }
   }, [isAdding, currentItem, setNewReminder]); // Ensure the effect runs when isAdding or currentItem changes
@@ -134,7 +130,7 @@ const NewReminderPopup = ({
               value={groupOptions.find(option => option.value === newReminder.group)}
               onChange={handleGroupChange}
               options={groupOptions}
-              isDisabled={handleDisable} // Conditionally disable the dropdown
+              isDisabled={!(currentItem.href === "/" || currentItem.href === "/Upcoming")} // Conditionally disable the dropdown
               styles={{
                 control: (base) => ({
                   ...base,
