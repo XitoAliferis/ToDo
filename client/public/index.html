@@ -1,53 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Web site created using create-react-app" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>ToDo</title>
-    <style>
-      html, body {
-        background: #626262;
-        margin: 0;
-        height: 100%;
-        overflow: hidden; /* Prevent scrolling */
-      }
-      #root {
-        background: #626262;
-        height: 100%;
-        overflow: hidden; /* Prevent scrolling within the root element */
-      }
-    </style>
-    <script>
-      // Disable double-tap to zoom
-      document.addEventListener('gesturestart', function (e) {
-        e.preventDefault();
-      });
-      // Disable pinch to zoom
-      document.addEventListener('touchmove', function (event) {
-        if (event.scale !== 1) {
-          event.preventDefault();
-        }
-      }, { passive: false });
 
-      // Prevent scrolling via arrow keys or touch events
-      window.addEventListener('keydown', function(e) {
-        // Space, Page Up/Down, Arrow keys
-        if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
-          e.preventDefault();
-        }
-      }, false);
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/logo.png" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Web site created using create-react-app" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <title>ToDo</title>
+  <style>
+    html,
+    body {
+      background: #626262;
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      /* Prevent scrolling */
+    }
 
-      window.addEventListener('touchmove', function(e) {
+    #root {
+      background: #626262;
+      height: 100%;
+      overflow: hidden;
+      /* Prevent scrolling within the root element */
+    }
+  </style>
+  <script>
+    // Disable double-tap to zoom
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+    // Disable pinch to zoom
+    document.addEventListener('touchmove', function (event) {
+      if (event.scale !== 1) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
+    // Prevent scrolling via arrow keys or touch events
+    window.addEventListener('keydown', function (e) {
+      // Prevent default for spacebar and navigation keys, but only when not focused on an input or textarea
+      const isInputFocused = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+
+      if (!isInputFocused && [32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
         e.preventDefault();
-      }, { passive: false });
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+      }
+    }, false);
+
+    window.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+    }, { passive: false });
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
 </html>
