@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Select, {components} from 'react-select';
 
 const NewReminderPopup = ({
@@ -18,8 +18,7 @@ const NewReminderPopup = ({
   handleNewReminderCancelButton,
   addReminderError
 }) => {
-  if (!isAdding) return null;
-
+  
   const getGroupNameById = (id) => {
     const group = navItems.find(item => item.id === id);
     return group ? group.label : 'Select Group';
@@ -30,9 +29,21 @@ const NewReminderPopup = ({
     .map(x => ({ value: x.id, label: x.label, color: x.bgColor }));
 
   const handleGroupChange = (selectedOption) => {
+    console.log("Selected Option:", selectedOption); // Debug line
     setNewReminder(prevState => ({ ...prevState, group: selectedOption.value }));
   };
 
+  const handleDisable = () => {
+    return !(currentItem.href === "/" || currentItem.href === "/Upcoming");
+  };
+
+  useEffect(() => {
+    if (isAdding && handleDisable()) {
+      setNewReminder(prevState => ({ ...prevState, group: currentItem.id }));
+    }
+  }, [isAdding, currentItem, setNewReminder]); // Ensure the effect runs when isAdding or currentItem changes
+
+  if (!isAdding) return null;
   return (
     <div ref={popupRef} className="absolute h-[335px] w-[225px] rounded-[6%] z-1" style={{ top: currentItem.href === "/" ? '13%' : '17%', backgroundColor: "rgba(36,36,36,1)", left: 'calc(100% - 15.6rem)', filter: "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))" }}>
       <div className="relative top-[4%] left-[10.5%]">
@@ -123,7 +134,7 @@ const NewReminderPopup = ({
               value={groupOptions.find(option => option.value === newReminder.group)}
               onChange={handleGroupChange}
               options={groupOptions}
-              isDisabled={!(currentItem.href === "/" || currentItem.href === "/Upcoming")} // Conditionally disable the dropdown
+              isDisabled={handleDisable} // Conditionally disable the dropdown
               styles={{
                 control: (base) => ({
                   ...base,
