@@ -52,7 +52,7 @@ const ReminderHeader = ({ navItems, colorScheme, isExpanded, handleEditReminder 
 
     return (
         <p
-            className={`absolute text-[28px] top-[3.7rem] transition-all duration-300 ${isExpanded ? 'left-[15.6rem]' : 'left-[5rem]'}`}
+            className={`relative mb-[-42px] text-[28px] top-[3.7rem] transition-all duration-300 ${isExpanded ? 'left-[15.6rem] max-w-[100vw-15.6rem]' : 'left-[5rem] max-w-[calc(100vw-5rem)]'}`}
             style={{
                 color: currentItem.bgColor,
                 filter: "drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4))",

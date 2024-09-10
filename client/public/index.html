@@ -27,32 +27,6 @@
       /* Prevent scrolling within the root element */
     }
   </style>
-  <script>
-    // Disable double-tap to zoom
-    document.addEventListener('gesturestart', function (e) {
-      e.preventDefault();
-    });
-    // Disable pinch to zoom
-    document.addEventListener('touchmove', function (event) {
-      if (event.scale !== 1) {
-        event.preventDefault();
-      }
-    }, { passive: false });
-
-    // Prevent scrolling via arrow keys or touch events
-    window.addEventListener('keydown', function (e) {
-      // Prevent default for spacebar and navigation keys, but only when not focused on an input or textarea
-      const isInputFocused = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
-
-      if (!isInputFocused && [32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
-        e.preventDefault();
-      }
-    }, false);
-
-    window.addEventListener('touchmove', function (e) {
-      e.preventDefault();
-    }, { passive: false });
-  </script>
 </head>
 
 <body>

@@ -27,7 +27,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const handleAllday = () => {
     setAllday(prevState => !prevState);
     const localDate = new Date(newReminder.date);
-  
+
     if (!allday) {
       const localDateString = new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()).toISOString().slice(0, 10);
       setNewReminder(prevState => ({ ...prevState, date: localDateString, allday: true }));
@@ -39,7 +39,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     }
   };
 
-  
+
 
   const handleDeleteReminderItem = async (id) => {
     setIsUpdating(true); // Set updating state
@@ -89,7 +89,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       group: prevState.group || ((currentItem.href !== "/" && currentItem.href !== "/Upcoming") ? currentItem.label : "")
     }));
   };
-  
+
 
   const handleOpenEditMenu = (item) => {
     setNewReminder({
@@ -117,7 +117,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       setIsUpdating(false); // Clear updating state
     }
     if (e.key === "Escape") {
-      if (!newReminder.name){
+      if (!newReminder.name) {
         setAddReminderError(true);
       }
       setIsAdding(false);
@@ -125,28 +125,28 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
     }
   };
 
-  const handleNewReminderCancelButton = async (e) =>{
+  const handleNewReminderCancelButton = async (e) => {
     setAddReminderError(false);
     setIsAdding(false);
-      setEditingReminder(null); // Clear the editing state
+    setEditingReminder(null); // Clear the editing state
   }
-  const handleNewReminderSaveButton = async (e) =>{
-    if (!newReminder.name){
+  const handleNewReminderSaveButton = async (e) => {
+    if (!newReminder.name) {
       setAddReminderError(true);
       return;
     }
     setAddReminderError(false);
     setIsUpdating(true); // Set updating state
-      if (editingReminder) {
-        const updatedReminder = { ...editingReminder, ...newReminder };
-        await handleEditReminderItem(updatedReminder);
-      } else {
-        handleAddReminder(newReminder.name, newReminder.date, newReminder.group, newReminder.allday, newReminder.daily);
-      }
-      setNewReminder({ name: "", date: "", group: "", allday: false, daily: false });
-      setIsAdding(false);
-      setEditingReminder(null); // Clear the editing state
-      setIsUpdating(false); // Clear updating state
+    if (editingReminder) {
+      const updatedReminder = { ...editingReminder, ...newReminder };
+      await handleEditReminderItem(updatedReminder);
+    } else {
+      handleAddReminder(newReminder.name, newReminder.date, newReminder.group, newReminder.allday, newReminder.daily);
+    }
+    setNewReminder({ name: "", date: "", group: "", allday: false, daily: false });
+    setIsAdding(false);
+    setEditingReminder(null); // Clear the editing state
+    setIsUpdating(false); // Clear updating state
   }
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -180,23 +180,23 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
   const removeOutdatedCheckedItems = async () => {
     const now = new Date();
     const todayDate = now.toISOString().split('T')[0];
-  
+
     const outdatedCheckedItems = reminderItems.filter(item => {
       const itemDate = new Date(item.date);
       const itemDateString = itemDate.toISOString().split('T')[0];
-  
+
       return item.done && !item.daily && !item.allday && (itemDateString < todayDate || (itemDateString === todayDate && itemDate < now));
     });
-  
+
     for (const item of outdatedCheckedItems) {
       await handleDeleteReminderItem(item.id);
     }
   };
-  
+
   useEffect(() => {
     removeOutdatedCheckedItems();
   }, [reminderItems]);
-  
+
 
   const today = convertToLocal(new Date()).substring(0, 10);
   const yesterday = convertToLocal(new Date(Date.now() - 86400000)).substring(0, 10);
@@ -212,51 +212,51 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       return new Date(a.date) - new Date(b.date);
     }
   };
-  
+
 
   const mapItemDate = item => item.allday ? { ...item, date: item.date } : { ...item, date: convertToLocal(item.date) };
-  
+
   const adjustDailyDate = item => {
     if (item.daily) {
-        const newDate = new Date();
-        const oldDate = new Date(item.date);
-        newDate.setHours(oldDate.getHours(), oldDate.getMinutes(), oldDate.getSeconds(), oldDate.getMilliseconds());
-        return { ...item,  date: convertToLocal(newDate.toISOString()) };  // Ensure the date is a string
+      const newDate = new Date();
+      const oldDate = new Date(item.date);
+      newDate.setHours(oldDate.getHours(), oldDate.getMinutes(), oldDate.getSeconds(), oldDate.getMilliseconds());
+      return { ...item, date: convertToLocal(newDate.toISOString()) };  // Ensure the date is a string
     }
     return item;
-};
-
-useEffect(() => {
-  const updateDailyReminders = async () => {
-    for (const item of reminderItems) {
-      if (item.daily) {
-        if (item.date.slice(0,10) <= yesterday) {
-          const updatedItem = adjustDailyDate({ ...item, done: false });
-          await handleEditReminderItem(updatedItem);
-        }
-      }
-    }
   };
 
-  updateDailyReminders();
-}, [reminderItems]);
+  useEffect(() => {
+    const updateDailyReminders = async () => {
+      for (const item of reminderItems) {
+        if (item.daily) {
+          if (item.date.slice(0, 10) <= yesterday) {
+            const updatedItem = adjustDailyDate({ ...item, done: false });
+            await handleEditReminderItem(updatedItem);
+          }
+        }
+      }
+    };
+
+    updateDailyReminders();
+  }, [reminderItems]);
 
 
-  
+
   const filterAndSortItems = (filterCondition) => reminderItems
-      .filter(filterCondition)
-      .map(adjustDailyDate)
-      .map(mapItemDate)
-      .sort(sortItems);
-  
-      const filteredReminderItems = currentItem.href === "/"
-      ? filterAndSortItems(item => item.date.toString().startsWith(today) || item.daily)
-      : currentItem.href === "/Upcoming"
-          ? filterAndSortItems(() => true)
-          : filterAndSortItems(item => item.group === currentItem.id);
-  
+  .map(adjustDailyDate)
+  .map(mapItemDate)
+  .filter(filterCondition)
+  .sort(sortItems);
+
+  const filteredReminderItems = currentItem.href === "/"
+    ? filterAndSortItems(item => item.date.toString().startsWith(today) || item.daily)
+    : currentItem.href === "/Upcoming"
+      ? filterAndSortItems(() => true)
+      : filterAndSortItems(item => item.group === currentItem.id);
+
   const uniqueDates = [...new Set(filteredReminderItems.map(item => item.date.slice(0, 10)))].sort();
-  
+
 
   const handleReminderItemContextMenu = (e, itemId) => {
     e.preventDefault();  // Prevent the default right-click context menu
