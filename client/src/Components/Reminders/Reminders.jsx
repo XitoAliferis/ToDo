@@ -185,7 +185,7 @@ const Reminders = ({ navItems, colorScheme, isExpanded, reminderItems, setRemind
       const itemDate = new Date(item.date);
       const itemDateString = itemDate.toISOString().split('T')[0];
 
-      return item.done && !item.daily && !item.allday && (itemDateString < todayDate || (itemDateString === todayDate && itemDate < now));
+      return item.done && !item.daily && (!item.allday || (itemDateString < todayDate)) && (itemDateString < todayDate || (itemDateString === todayDate && itemDate < now));
     });
 
     for (const item of outdatedCheckedItems) {
